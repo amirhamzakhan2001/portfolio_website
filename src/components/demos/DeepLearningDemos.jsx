@@ -90,7 +90,7 @@ function NeuralNetwork() {
         <button onClick={forward} className="px-3 py-1 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 transition-all">Forward Pass</button>
         <span className="text-xs font-mono text-text-muted ml-auto">Architecture: [{layers.join(', ')}]</span>
       </div>
-      <canvas ref={canvasRef} width={520} height={220} className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 220 }} />
+      <canvas ref={canvasRef} width={720} height={340} className="demo-canvas w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 340, minHeight: 280 }} />
       <p className="text-[10px] font-mono text-text-muted text-center">Node brightness = activation strength. Click Forward Pass to run inference.</p>
     </div>
   )
@@ -174,7 +174,7 @@ function ActivationFunctions() {
           </button>
         ))}
       </div>
-      <canvas ref={canvasRef} width={520} height={220} className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 220 }} />
+      <canvas ref={canvasRef} width={720} height={340} className="demo-canvas w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 340, minHeight: 280 }} />
     </div>
   )
 }
@@ -186,6 +186,7 @@ function Backpropagation() {
   const [loss, setLoss] = useState([])
   const [weights, setWeights] = useState({ w1: 0.5, w2: -0.3, b: 0.1 })
   const [running, setRunning] = useState(false)
+  const [vizSample, setVizSample] = useState(0)
   const intervalRef = useRef(null)
 
   // Simple XOR-like problem: learn y = x1 XOR x2
@@ -241,8 +242,112 @@ function Backpropagation() {
 
   const currentLoss = loss[loss.length - 1] ?? 0.5
 
+  // ── Forward-pass visualization (one neuron: z = w·x + b, a = σ(z)) ───────────
+  const { x1: vx1, x2: vx2, y: vy } = data[vizSample]
+  const vz = weights.w1 * vx1 + weights.w2 * vx2 + weights.b
+  const va = sigmoid(vz)
+  /** 0–3 cycles which edge is “lit” to show signal flow each epoch */
+  const flowPhase = epoch % 4
+
+  const W = 420
+  const H = 200
+  const p = {
+    x1: { x: 48, y: 52 },
+    x2: { x: 48, y: 148 },
+    n: { x: 210, y: 100 },
+    out: { x: 372, y: 100 },
+  }
+  const edgeStrength = (w) => Math.min(4, 0.8 + Math.abs(w) * 4)
+
   return (
     <div className="space-y-4">
+      <p className="text-[10px] font-mono text-text-muted leading-relaxed">
+        Watch <span className="text-accent-cyan">forward signal</span> flow left→right each epoch (inputs → weighted sum z → activation σ(z)).
+        Training adjusts w₁, w₂, b so loss drops — that is the backward (gradient) update, summarized in the metrics below.
+      </p>
+
+      <div className="rounded-xl border border-white/10 bg-bg-primary/50 p-3 overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <span className="text-[10px] font-mono text-text-muted">Visualize sample:</span>
+          {data.map((row, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setVizSample(i)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-all ${
+                vizSample === i ? 'bg-accent-indigo/25 border-accent-indigo/50 text-text-primary' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/20'
+              }`}
+            >
+              ({row.x1},{row.x2})→{row.y}
+            </button>
+          ))}
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[520px] mx-auto" style={{ minHeight: 180 }}>
+          <defs>
+            <marker id="arrow-bp" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="rgba(99,102,241,0.6)" />
+            </marker>
+          </defs>
+          {/* Edges: inputs → one neuron (z), neuron → output (σ) */}
+          <line
+            x1={p.x1.x + 22} y1={p.x1.y} x2={p.n.x - 28} y2={p.n.y}
+            stroke={flowPhase === 0 ? '#06b6d4' : 'rgba(99,102,241,0.45)'}
+            strokeWidth={flowPhase === 0 ? edgeStrength(weights.w1) + 1 : edgeStrength(weights.w1)}
+            strokeLinecap="round"
+          />
+          <line
+            x1={p.x2.x + 22} y1={p.x2.y} x2={p.n.x - 28} y2={p.n.y}
+            stroke={flowPhase === 1 ? '#06b6d4' : 'rgba(99,102,241,0.45)'}
+            strokeWidth={flowPhase === 1 ? edgeStrength(weights.w2) + 1 : edgeStrength(weights.w2)}
+            strokeLinecap="round"
+          />
+          <line
+            x1={p.n.x + 28} y1={p.n.y} x2={p.out.x - 26} y2={p.out.y}
+            stroke={flowPhase >= 2 ? '#a855f7' : 'rgba(139,92,246,0.45)'}
+            strokeWidth={flowPhase >= 2 ? 3.5 : 2}
+            strokeLinecap="round"
+            markerEnd="url(#arrow-bp)"
+          />
+          {flowPhase === 0 && (
+            <circle r="5" fill="#06b6d4" opacity="0.95">
+              <animate attributeName="cx" values={`${p.x1.x + 22};${p.n.x - 28}`} dur="0.55s" repeatCount="indefinite" />
+              <animate attributeName="cy" values={`${p.x1.y};${p.n.y}`} dur="0.55s" repeatCount="indefinite" />
+            </circle>
+          )}
+          {flowPhase === 1 && (
+            <circle r="5" fill="#06b6d4" opacity="0.95">
+              <animate attributeName="cx" values={`${p.x2.x + 22};${p.n.x - 28}`} dur="0.55s" repeatCount="indefinite" />
+              <animate attributeName="cy" values={`${p.x2.y};${p.n.y}`} dur="0.55s" repeatCount="indefinite" />
+            </circle>
+          )}
+          {(flowPhase === 2 || flowPhase === 3) && (
+            <circle r="5" fill="#a855f7" opacity="0.95">
+              <animate attributeName="cx" values={`${p.n.x + 28};${p.out.x - 26}`} dur="0.5s" repeatCount="indefinite" />
+              <animate attributeName="cy" values={`${p.n.y};${p.out.y}`} dur="0.5s" repeatCount="indefinite" />
+            </circle>
+          )}
+          {/* Input nodes */}
+          <circle cx={p.x1.x} cy={p.x1.y} r="22" fill="rgba(99,102,241,0.15)" stroke="#6366f1" strokeWidth="2" />
+          <text x={p.x1.x} y={p.x1.y + 4} textAnchor="middle" fill="#e2e8f0" fontSize="11" fontFamily="monospace">x₁={vx1}</text>
+          <circle cx={p.x2.x} cy={p.x2.y} r="22" fill="rgba(99,102,241,0.15)" stroke="#6366f1" strokeWidth="2" />
+          <text x={p.x2.x} y={p.x2.y + 4} textAnchor="middle" fill="#e2e8f0" fontSize="11" fontFamily="monospace">x₂={vx2}</text>
+          {/* Neuron */}
+          <circle cx={p.n.x} cy={p.n.y} r="28" fill={flowPhase === 2 ? 'rgba(6,182,212,0.2)' : 'rgba(99,102,241,0.12)'} stroke={flowPhase === 2 ? '#06b6d4' : '#6366f1'} strokeWidth="2" />
+          <text x={p.n.x} y={p.n.y - 6} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="monospace">Σ+b</text>
+          <text x={p.n.x} y={p.n.y + 8} textAnchor="middle" fill="#f8fafc" fontSize="10" fontFamily="monospace">z={vz.toFixed(2)}</text>
+          {/* Output */}
+          <circle cx={p.out.x} cy={p.out.y} r="26" fill={flowPhase === 3 ? 'rgba(168,85,247,0.25)' : 'rgba(139,92,246,0.12)'} stroke="#a855f7" strokeWidth="2" />
+          <text x={p.out.x} y={p.out.y - 5} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="monospace">σ(z)</text>
+          <text x={p.out.x} y={p.out.y + 9} textAnchor="middle" fill="#f8fafc" fontSize="10" fontFamily="monospace">{va.toFixed(3)}</text>
+          {/* Weight labels */}
+          <text x={(p.x1.x + 22 + p.n.x - 28) / 2} y={(p.x1.y + p.n.y) / 2 - 8} fill="#64748b" fontSize="9" fontFamily="monospace" textAnchor="middle">w₁={weights.w1.toFixed(2)}</text>
+          <text x={(p.x2.x + 22 + p.n.x - 28) / 2} y={(p.x2.y + p.n.y) / 2 + 14} fill="#64748b" fontSize="9" fontFamily="monospace" textAnchor="middle">w₂={weights.w2.toFixed(2)}</text>
+        </svg>
+        <p className="text-[9px] font-mono text-text-muted/80 text-center mt-1">
+          Edge brightness follows |w|; pulse animates forward pass. Target for this sample: y = {vy}
+        </p>
+      </div>
+
       <div className="flex gap-2 items-center flex-wrap">
         <button onClick={toggle} className={`px-3 py-1 rounded-lg text-xs font-mono border transition-all ${running ? 'bg-red-500/20 border-red-500/30 text-red-400' : 'bg-accent-indigo/20 border-accent-indigo/30 text-accent-indigo'}`}>
           {running ? 'Pause' : 'Train'}
@@ -264,7 +369,7 @@ function Backpropagation() {
 
       {/* Loss curve */}
       {loss.length > 1 && (
-        <svg viewBox={`0 0 ${loss.length} 100`} preserveAspectRatio="none" className="w-full h-20 rounded-xl bg-bg-primary/40 border border-white/5">
+        <svg viewBox={`0 0 ${loss.length} 100`} preserveAspectRatio="none" className="w-full h-32 rounded-xl bg-bg-primary/40 border border-white/5">
           <polyline
             points={loss.map((v, i) => `${i},${100 - v * 200}`).join(' ')}
             fill="none" stroke="#6366f1" strokeWidth={1.5} />

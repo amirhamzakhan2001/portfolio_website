@@ -1,4 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
+import { isAdvancedDemo } from '../../config/demoTier'
+import { demoAgentStep } from '../../services/demoApiService'
 
 // ── ReAct Agent ───────────────────────────────────────────────────────────────
 const TOOLS = {
@@ -359,7 +361,7 @@ function LangGraphFlow() {
         </button>
       </div>
 
-      <svg viewBox="0 0 300 310" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 240 }}>
+      <svg viewBox="0 0 300 310" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 380, minHeight: 300 }}>
         {edges.map(([a, b]) => {
           const na = nodeById(a), nb = nodeById(b)
           if (!na || !nb) return null
@@ -399,14 +401,238 @@ function LangGraphFlow() {
   )
 }
 
+// ── Advanced: ReAct Agent (real tool-calling loop) ────────────────────────────
+const TOOL_LABELS = { calculator: '🔢 Calculator', datetime: '🕐 DateTime', search: '🔍 Search' }
+
+function ReactAgentAdvanced() {
+  const [task, setTask] = useState('What is 42 * 17 + the square root of 144? Also, what day is today?')
+  const [trace, setTrace] = useState([])
+  const [running, setRunning] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const run = async () => {
+    setRunning(true); setTrace([]); setError(null); setProvider(null)
+    const messages = [{ role: 'user', content: task }]
+    const MAX_STEPS = 7
+
+    try {
+      for (let i = 0; i < MAX_STEPS; i++) {
+        const { step, provider: p } = await demoAgentStep({
+          task,
+          messages,
+          availableTools: ['calculator', 'datetime', 'search'],
+        })
+        if (!provider && p) setProvider(p)
+
+        if (step.type === 'tool_call') {
+          if (step.thought) {
+            setTrace(prev => [...prev, { type: 'thought', content: step.thought }])
+          }
+          setTrace(prev => [...prev,
+            { type: 'action', tool: step.tool, input: JSON.stringify(step.toolArgs) },
+            { type: 'observation', content: step.toolResult },
+          ])
+          if (step.message) messages.push(step.message)
+          if (step.toolMessage) messages.push(step.toolMessage)
+          await new Promise(r => setTimeout(r, 250))
+        } else {
+          setTrace(prev => [...prev, { type: 'answer', content: step.content }])
+          break
+        }
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setRunning(false)
+    }
+  }
+
+  const typeColors = {
+    thought: 'border-yellow-500/30 bg-yellow-500/5 text-yellow-300',
+    action: 'border-accent-indigo/30 bg-accent-indigo/5 text-accent-indigo',
+    observation: 'border-green-500/30 bg-green-500/5 text-green-300',
+    answer: 'border-accent-cyan/30 bg-accent-cyan/5 text-accent-cyan',
+  }
+  const typeLabels = { thought: '💭 Thought', action: '⚡ Action', observation: '👁 Observation', answer: '✅ Final Answer' }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input
+          value={task}
+          onChange={e => setTask(e.target.value)}
+          className="flex-1 bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-text-primary focus:outline-none focus:border-accent-indigo/50"
+        />
+        <button
+          onClick={run}
+          disabled={running}
+          className="px-4 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {running ? '…' : 'Run Agent'}
+        </button>
+      </div>
+
+      {provider && (
+        <div className="flex items-center gap-1.5 text-[10px] font-mono text-green-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          Live agent · {provider}
+        </div>
+      )}
+
+      <div className="space-y-2 max-h-72 overflow-y-auto">
+        {trace.map((step, i) => (
+          <div key={i} className={`rounded-lg p-2.5 border text-xs font-mono ${typeColors[step.type]}`}>
+            <div className="text-[9px] opacity-60 mb-1">{typeLabels[step.type]}</div>
+            {step.type === 'action'
+              ? <><span>{TOOL_LABELS[step.tool] || step.tool}: </span><span className="opacity-80">{step.input}</span></>
+              : step.content}
+          </div>
+        ))}
+        {running && <div className="text-xs font-mono text-text-muted animate-pulse">Agent calling model…</div>}
+      </div>
+
+      {error && (
+        <div className="text-[10px] font-mono text-yellow-400 text-center">
+          ⚠ {error.includes('No agent API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Advanced: Tool Calling (real function calling) ────────────────────────────
+function ToolCallingAdvanced() {
+  const [query, setQuery] = useState('Search for Python tutorials and calculate 15% of 350')
+  const [calls, setCalls] = useState([])
+  const [finalAnswer, setFinalAnswer] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const toolDefs = [
+    { name: 'search', description: 'Search for information', icon: '🔍' },
+    { name: 'calculator', description: 'Evaluate math expressions', icon: '🔢' },
+    { name: 'datetime', description: 'Get current date/time', icon: '🕐' },
+  ]
+
+  const run = async () => {
+    setLoading(true); setCalls([]); setFinalAnswer(null); setError(null); setProvider(null)
+    const messages = [{ role: 'user', content: query }]
+    const collectedCalls = []
+
+    try {
+      for (let i = 0; i < 5; i++) {
+        const { step, provider: p } = await demoAgentStep({
+          task: query,
+          messages,
+          availableTools: ['calculator', 'datetime', 'search'],
+        })
+        if (!provider && p) setProvider(p)
+
+        if (step.type === 'tool_call') {
+          const call = { tool: step.tool, args: step.toolArgs, result: step.toolResult }
+          collectedCalls.push(call)
+          setCalls([...collectedCalls])
+          if (step.message) messages.push(step.message)
+          if (step.toolMessage) messages.push(step.toolMessage)
+        } else {
+          setFinalAnswer(step.content)
+          break
+        }
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="flex-1 bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-text-primary focus:outline-none focus:border-accent-indigo/50"
+        />
+        <button
+          onClick={run}
+          disabled={loading}
+          className="px-4 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {loading ? '…' : 'Call Tools'}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {toolDefs.map(t => {
+          const used = calls.some(c => c.tool === t.name)
+          return (
+            <div key={t.name} className={`glass rounded-lg p-2 border text-center transition-all ${used ? 'border-accent-indigo/40 bg-accent-indigo/5' : 'border-white/5'}`}>
+              <div className="text-lg mb-0.5">{t.icon}</div>
+              <div className={`text-[10px] font-mono ${used ? 'text-accent-indigo' : 'text-text-muted'} capitalize`}>{t.name}</div>
+              <div className="text-[9px] text-text-muted">{t.description}</div>
+              {used && <div className="text-[8px] text-green-400 mt-0.5">✓ called</div>}
+            </div>
+          )
+        })}
+      </div>
+
+      {loading && <div className="text-xs font-mono text-text-muted animate-pulse text-center">Executing tool calls…</div>}
+
+      {calls.length > 0 && (
+        <div className="space-y-2">
+          {calls.map((call, i) => (
+            <div key={i} className="glass rounded-lg p-3 border border-accent-indigo/15">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span>{toolDefs.find(t => t.name === call.tool)?.icon ?? '⚙'}</span>
+                <span className="text-[10px] font-mono text-accent-indigo capitalize">{call.tool}</span>
+                <span className="text-[10px] font-mono text-text-muted">{JSON.stringify(call.args)}</span>
+              </div>
+              <div className="text-xs text-text-secondary bg-bg-primary/40 rounded-lg px-2 py-1 font-mono">{call.result}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {finalAnswer && (
+        <div className="glass rounded-lg p-4 border border-accent-cyan/25">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-mono text-accent-cyan">✅ Final Answer</span>
+            {provider && <span className="text-[9px] font-mono text-green-400 ml-auto flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />{provider}</span>}
+          </div>
+          <p className="text-xs text-text-secondary leading-relaxed">{finalAnswer}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-[10px] font-mono text-yellow-400 text-center">
+          ⚠ {error.includes('No agent API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Registry ──────────────────────────────────────────────────────────────────
-const COMPONENTS = {
+const COMPONENTS_MEDIUM = {
   ReactAgent,
   ToolCalling,
   MultiAgent,
   MemoryTypes,
   LangGraphFlow,
 }
+
+const COMPONENTS_ADVANCED = {
+  ReactAgent: ReactAgentAdvanced,
+  ToolCalling: ToolCallingAdvanced,
+  MultiAgent,
+  MemoryTypes,
+  LangGraphFlow,
+}
+
+const COMPONENTS = isAdvancedDemo ? COMPONENTS_ADVANCED : COMPONENTS_MEDIUM
 
 export default function AgenticDemos({ componentName }) {
   const Demo = COMPONENTS[componentName]

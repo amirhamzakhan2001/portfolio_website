@@ -16,7 +16,7 @@ function LinearRegression() {
     { x: 60, y: 35 }, { x: 75, y: 20 }, { x: 85, y: 15 },
   ])
   const svgRef = useRef(null)
-  const W = 500, H = 300
+  const W = 640, H = 400
 
   const regression = useCallback(() => {
     if (points.length < 2) return null
@@ -49,7 +49,7 @@ function LinearRegression() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Click on the canvas to add data points. Watch OLS regression update live.</p>
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60 cursor-crosshair" style={{ maxHeight: 280 }} onClick={addPoint}>
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60 cursor-crosshair" style={{ maxHeight: 420 }} onClick={addPoint}>
         {/* Grid */}
         {[20,40,60,80].map(v => (
           <g key={v}>
@@ -89,7 +89,7 @@ function LogisticRegression() {
   const [z, setZ] = useState(0)
   const [age, setAge] = useState(45)
   const [score, setScore] = useState(60)
-  const W = 480, H = 220
+  const W = 560, H = 300
 
   const sigmoid = (x) => 1 / (1 + Math.exp(-x))
   const prob = sigmoid(z)
@@ -110,7 +110,7 @@ function LogisticRegression() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Adjust z to see the sigmoid output. Below: real-world binary prediction.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 200 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 320 }}>
         <line x1={0} y1={H/2} x2={W} y2={H/2} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
         <line x1={W/2} y1={0} x2={W/2} y2={H} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
         <path d={path()} fill="none" stroke="#6366F1" strokeWidth="2.5" />
@@ -184,7 +184,7 @@ function DecisionTree() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">A decision tree for the most important question. Answer below to traverse.</p>
-      <svg viewBox="0 0 480 320" className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 260 }}>
+      <svg viewBox="0 0 480 320" className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 400 }}>
         {[['root','ml',true],['root','python',false],['ml','no1',true],['python','no2',true],['python','prod',false],['prod','no3',true],['prod','yes3',false]].map(([a,b,isYes]) => {
           const na = nodes.find(n=>n.id===a), nb = nodes.find(n=>n.id===b)
           if (!na || !nb) return null
@@ -233,7 +233,7 @@ function DecisionTree() {
 
 // ── K-Means Clustering ────────────────────────────────────────────────────────
 function KMeans() {
-  const W = 480, H = 280
+  const W = 560, H = 340
   const COLORS = ['#6366F1','#06B6D4','#10B981','#F59E0B','#EF4444']
 
   const genPoints = () => {
@@ -281,7 +281,7 @@ function KMeans() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Click Step to run one iteration of Lloyd's algorithm. Watch centroids converge.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 260 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 400 }}>
         {points.map((p, i) => (
           <circle key={i} cx={p.x/100*W} cy={p.y/100*H} r="5"
             fill={p.cluster >= 0 ? COLORS[p.cluster] : '#6366F1'} opacity="0.7" />
@@ -308,7 +308,7 @@ function KMeans() {
 
 // ── SVM ───────────────────────────────────────────────────────────────────────
 function SVM() {
-  const W = 480, H = 280
+  const W = 560, H = 340
   const [C, setC] = useState(1)
   const classA = [[20,30],[25,40],[15,50],[30,35],[22,55],[18,42]]
   const classB = [[70,60],[75,50],[65,70],[80,55],[72,65],[68,45]]
@@ -318,7 +318,7 @@ function SVM() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Adjust C (regularization) to see how the margin changes between classes.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 260 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 400 }}>
         {/* Decision boundary */}
         <line x1={W*0.48} y1={0} x2={W*0.48} y2={H} stroke="#6366F1" strokeWidth="2" />
         {/* Margin lines */}
@@ -344,7 +344,7 @@ function SVM() {
 
 // ── KNN ───────────────────────────────────────────────────────────────────────
 function KNN() {
-  const W = 480, H = 280
+  const W = 560, H = 340
   const [k, setK] = useState(3)
   const [testPt, setTestPt] = useState(null)
   const svgRef = useRef(null)
@@ -375,7 +375,7 @@ function KNN() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Click to place a test point. KNN classifies it by majority vote of K neighbors.</p>
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60 cursor-crosshair" style={{ maxHeight: 260 }} onClick={handleClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60 cursor-crosshair" style={{ maxHeight: 400 }} onClick={handleClick}>
         {data.map((p, i) => (
           <circle key={i} cx={p.x/100*W} cy={p.y/100*H} r="6"
             fill={p.cls===0 ? '#06B6D4' : '#8B5CF6'}
@@ -413,7 +413,7 @@ function KNN() {
 
 // ── Bias-Variance Tradeoff ────────────────────────────────────────────────────
 function BiasVariance() {
-  const W = 480, H = 260
+  const W = 560, H = 320
   const [degree, setDegree] = useState(2)
 
   const trueData = Array.from({length: 20}, (_, i) => {
@@ -467,7 +467,7 @@ function BiasVariance() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Adjust polynomial degree. Low = underfit (high bias), high = overfit (high variance).</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 240 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 360 }}>
         <path d={truePath()} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeDasharray="8 4" />
         <path d={curvePath()} fill="none" stroke={color} strokeWidth="2.5" />
         {trueData.map((p, i) => <circle key={i} cx={p.x*W} cy={(1-p.y)*H} r="4" fill="rgba(6,182,212,0.6)" />)}
@@ -487,7 +487,7 @@ function BiasVariance() {
 
 // ── Gradient Descent ──────────────────────────────────────────────────────────
 function GradientDescent() {
-  const W = 480, H = 260
+  const W = 560, H = 320
   const [lr, setLr] = useState(0.1)
   const [x, setX] = useState(-4)
   const [history, setHistory] = useState([])
@@ -535,7 +535,7 @@ function GradientDescent() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-text-muted font-mono">Watch gradient descent minimize the loss function. Adjust learning rate.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 240 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl border border-white/10 bg-bg-primary/60" style={{ maxHeight: 360 }}>
         <path d={path()} fill="none" stroke="#6366F1" strokeWidth="2.5" />
         {history.map((pt, i) => (
           <circle key={i} cx={xToSvg(pt.x)} cy={yToSvg(pt.y)} r="3" fill="rgba(239,68,68,0.4)" />

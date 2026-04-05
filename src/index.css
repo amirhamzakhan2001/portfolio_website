@@ -178,6 +178,19 @@ body {
   overflow: hidden;
 }
 
+/* Theory math in demo viewer — no duplicate title bar; room for multi-line formulas */
+.theory-formula {
+  font-family: 'Fira Code', monospace;
+  background: rgba(10, 10, 20, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 2.75rem 1.25rem 1.35rem;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  min-height: 7.5rem;
+}
+
 .code-block::before {
   content: '';
   position: absolute;
@@ -269,6 +282,7 @@ body {
 /* Demo canvas container */
 .demo-canvas {
   width: 100%;
+  min-height: 280px;
   height: 100%;
   border-radius: 8px;
   cursor: crosshair;

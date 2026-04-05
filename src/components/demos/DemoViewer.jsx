@@ -1,6 +1,8 @@
-import { useState, Suspense, lazy } from 'react'
+import { useState, Suspense, lazy, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { X, ChevronRight } from 'lucide-react'
+import { X, ChevronRight, ArrowLeft } from 'lucide-react'
+import { isAdvancedDemo } from '../../config/demoTier'
 
 // ── Lazy-load all category demo modules ──────────────────────────────────────
 const categoryModules = {
@@ -37,8 +39,8 @@ function TheorySection({ theory }) {
       )}
 
       {theory.math && (
-        <div className="code-block pt-8 text-sm font-mono text-accent-indigo leading-relaxed whitespace-pre-wrap">
-          <div className="absolute top-0 left-0 right-0 h-7 flex items-center gap-1.5 px-3">
+        <div className="theory-formula text-sm font-mono text-accent-indigo leading-relaxed whitespace-pre-wrap">
+          <div className="absolute top-0 left-0 right-0 h-8 flex items-center gap-1.5 px-3 rounded-t-xl border-b border-white/10 bg-[rgba(15,15,30,0.95)]">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
             <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
@@ -53,9 +55,11 @@ function TheorySection({ theory }) {
         <div className="rounded-xl overflow-hidden border border-white/10">
           <img
             src={theory.image}
-            alt={theory.imageCaption || 'concept diagram'}
-            className="w-full object-contain bg-white/5 max-h-64"
+            alt={theory.imageCaption ? '' : 'Concept diagram'}
+            className="w-full object-contain bg-white/5 max-h-[min(70vh,520px)]"
             loading="lazy"
+            referrerPolicy="no-referrer"
+            decoding="async"
           />
           {theory.imageCaption && (
             <p className="text-[10px] font-mono text-text-muted/60 text-center py-2 bg-bg-tertiary/50">
@@ -121,24 +125,52 @@ export default function DemoViewer({ category, demoMap, onClose }) {
 
   const CategoryModule = categoryModules[category.id]
 
-  return (
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
+  const overlay = (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col"
+      className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col"
       style={{ overflowY: 'hidden' }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="demo-viewer-title"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{category.icon}</span>
-          <div>
-            <h2 className="font-display font-bold text-lg text-text-primary">{category.title}</h2>
+      <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 flex items-center gap-2 text-xs font-mono text-text-muted hover:text-accent-cyan transition-colors cursor-none px-3 py-2 rounded-xl border border-white/10 hover:border-accent-cyan/40 bg-white/5"
+          >
+            <ArrowLeft size={16} className="shrink-0" />
+            <span className="hidden sm:inline">Back to categories</span>
+            <span className="sm:hidden">Back</span>
+          </button>
+          <span className="text-2xl shrink-0">{category.icon}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 id="demo-viewer-title" className="font-display font-bold text-lg text-text-primary truncate">{category.title}</h2>
+              {isAdvancedDemo && (
+                <span className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />
+                  LIVE
+                </span>
+              )}
+            </div>
             <p className="text-xs font-mono text-text-muted">{demos.length} interactive demos</p>
           </div>
         </div>
-        <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors cursor-none p-2">
+        <button type="button" onClick={onClose} aria-label="Close demos" className="text-text-muted hover:text-text-primary transition-colors cursor-none p-2 shrink-0">
           <X size={20} />
         </button>
       </div>
@@ -177,12 +209,13 @@ export default function DemoViewer({ category, demoMap, onClose }) {
               </div>
 
               {/* Interactive Demo */}
-              <div className="glass rounded-2xl p-5 border border-white/8 mb-2">
+              <div className="glass rounded-2xl p-5 md:p-6 border border-white/8 mb-2 min-h-[min(62vh,720px)] flex flex-col">
                 <div className="text-[10px] font-mono text-accent-indigo/60 uppercase tracking-wider mb-4">
                   ▶ Interactive Demo
                 </div>
+                <div className="flex-1 min-h-0 flex flex-col">
                 <Suspense fallback={
-                  <div className="flex items-center justify-center h-48 text-text-muted text-sm font-mono">
+                  <div className="flex items-center justify-center min-h-[min(45vh,400px)] text-text-muted text-sm font-mono">
                     Loading demo…
                   </div>
                 }>
@@ -190,6 +223,7 @@ export default function DemoViewer({ category, demoMap, onClose }) {
                     <CategoryModule componentName={selected.component} />
                   )}
                 </Suspense>
+                </div>
               </div>
 
               {/* Theory */}
@@ -200,4 +234,6 @@ export default function DemoViewer({ category, demoMap, onClose }) {
       </div>
     </motion.div>
   )
+
+  return typeof document !== 'undefined' ? createPortal(overlay, document.body) : null
 }

@@ -366,7 +366,7 @@ export const DEMOS = [
     title: 'Neural Network Builder',
     icon: '🕸️',
     tagline: 'Add/remove layers and neurons, watch the network visualize live',
-    component: 'NeuralNetworkBuilder',
+    component: 'NeuralNetwork',
     theory: {
       what: 'An Artificial Neural Network (ANN) consists of layers of interconnected nodes (neurons). Each neuron computes a weighted sum of its inputs, applies an activation function, and passes the result to the next layer.',
       how: 'Forward pass: data flows from input → hidden layers → output, each layer applying linear transformation + activation. Training uses backpropagation to compute gradients and gradient descent to update weights.',
@@ -423,7 +423,7 @@ export const DEMOS = [
     title: 'CNN Architecture',
     icon: '🖼️',
     tagline: 'Interactive walkthrough of convolutional layers, pooling, and filters',
-    component: 'CNNArchitecture',
+    component: 'CNN',
     theory: {
       what: 'Convolutional Neural Networks (CNNs) are specialized for grid-structured data like images. They use learnable filters that slide across the input to detect local patterns (edges, textures, objects).',
       how: 'A convolution layer applies multiple filters to the input, producing feature maps. Pooling layers downsample these maps. Fully connected layers at the end perform classification. Filters learn hierarchically — early layers detect edges, later layers detect objects.',
@@ -500,7 +500,7 @@ export const DEMOS = [
     title: 'TF-IDF Vectorizer',
     icon: '📊',
     tagline: 'Compute term importance weights across two documents',
-    component: 'TFIDFDemo',
+    component: 'TFIDF',
     theory: {
       what: 'TF-IDF (Term Frequency–Inverse Document Frequency) is a numerical statistic that reflects how important a word is to a document in a collection. It weights up rare, specific words and weights down common ones.',
       how: 'TF is the frequency of a term in a document. IDF is the log of the total number of documents divided by the number containing the term. TF-IDF = TF × IDF. Common words like "the" get low IDF scores.',
@@ -538,7 +538,7 @@ export const DEMOS = [
     title: 'Sentiment Analysis',
     icon: '😊',
     tagline: 'Lexicon-based sentiment scoring with positive/negative/neutral output',
-    component: 'SentimentDemo',
+    component: 'Sentiment',
     theory: {
       what: 'Sentiment Analysis (opinion mining) automatically determines the emotional tone of text — positive, negative, or neutral. It is one of the most widely applied NLP tasks in industry.',
       how: 'Lexicon-based approaches use dictionaries of positive/negative words with associated scores. ML approaches train classifiers on labeled text. Transformer models (BERT, RoBERTa) achieve state-of-the-art accuracy.',
@@ -576,7 +576,7 @@ export const DEMOS = [
     title: 'Named Entity Recognition',
     icon: '🏷️',
     tagline: 'Highlight persons, places, and organizations in text automatically',
-    component: 'NERDemo',
+    component: 'NER',
     theory: {
       what: 'Named Entity Recognition (NER) identifies and classifies named entities in text into categories such as Person, Organization, Location, Date, and more.',
       how: 'Rule-based systems use gazetteers (dictionaries of known entities). ML systems use BiLSTM-CRF or Transformer models fine-tuned on labeled NER datasets, learning to predict BIO (Beginning-Inside-Outside) tags.',

@@ -189,7 +189,7 @@ function StockPredictor() {
 
   const toX = (i, total, W) => 10 + (i / (total - 1)) * (W - 20)
   const toY = (v, H) => 10 + (1 - (v - yMin) / (yMax - yMin)) * (H - 20)
-  const W = 300, H = 160
+  const W = 420, H = 240
   const n = data?.prices.length ?? 1
 
   return (

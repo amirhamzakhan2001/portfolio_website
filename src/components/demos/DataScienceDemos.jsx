@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { isAdvancedDemo } from '../../config/demoTier'
 
 // ── Distribution Explorer ─────────────────────────────────────────────────────
 function DistributionExplorer() {
@@ -123,7 +124,7 @@ function DistributionExplorer() {
           </button>
         ))}
       </div>
-      <canvas ref={canvasRef} width={520} height={200} className="w-full rounded-xl bg-bg-primary/40 border border-white/5" />
+      <canvas ref={canvasRef} width={720} height={340} className="demo-canvas w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ minHeight: 280 }} />
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-mono text-text-muted mb-1 block">{current?.p1}: <span className="text-accent-indigo">{param1.toFixed(2)}</span></label>
@@ -286,7 +287,7 @@ function OutlierDetection() {
         <button onClick={regenerate} className="ml-auto px-3 py-1 rounded-lg text-xs font-mono bg-white/5 text-text-muted hover:bg-white/10 transition-all">Regenerate</button>
       </div>
 
-      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 200 }}>
+      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 320, minHeight: 260 }}>
         {points.map((p, i) => {
           const out = isOutlier(p, i)
           return (
@@ -389,7 +390,7 @@ function PCAVisualizer() {
       </div>
       {result && (
         <>
-          <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 200 }}>
+          <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 320, minHeight: 260 }}>
             <text x="8" y="16" className="text-[8px]" fill="rgba(255,255,255,0.4)" fontSize={9} fontFamily="monospace">PC2</text>
             <text x="260" y="195" fill="rgba(255,255,255,0.4)" fontSize={9} fontFamily="monospace">PC1</text>
             {result.proj.map((p, i) => (
@@ -631,7 +632,7 @@ function TSNEVisualizer() {
           {running ? 'Running…' : 'Re-run'}
         </button>
       </div>
-      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 200 }}>
+      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 320, minHeight: 260 }}>
         <text x="8" y="14" fill="rgba(255,255,255,0.4)" fontSize={9} fontFamily="monospace">t-SNE 2D</text>
         {result?.map((p, i) => (
           <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={3.5} fill={p.color} fillOpacity={0.75} />
@@ -642,8 +643,229 @@ function TSNEVisualizer() {
   )
 }
 
+// ── Advanced: Statistical Summary with CSV Upload ─────────────────────────────
+function parseCSV(raw) {
+  const lines = raw.trim().split(/\r?\n/)
+  if (lines.length < 2) return null
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim())
+  const rows = lines.slice(1).map(line => {
+    const values = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || line.split(',')
+    const row = {}
+    headers.forEach((h, i) => {
+      const v = (values[i] || '').replace(/^"|"$/g, '').trim()
+      row[h] = v === '' ? null : isNaN(Number(v)) ? v : Number(v)
+    })
+    return row
+  })
+  return { headers, rows }
+}
+
+function colStats(rows, col) {
+  const vals = rows.map(r => r[col]).filter(v => v !== null && typeof v === 'number')
+  if (!vals.length) return null
+  const n = vals.length
+  const mean = vals.reduce((a, b) => a + b, 0) / n
+  const sorted = [...vals].sort((a, b) => a - b)
+  const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / n
+  return {
+    n,
+    missing: rows.length - n,
+    mean: mean.toFixed(4),
+    std: Math.sqrt(variance).toFixed(4),
+    min: sorted[0].toFixed(4),
+    q25: sorted[Math.floor(n * 0.25)].toFixed(4),
+    median: sorted[Math.floor(n * 0.5)].toFixed(4),
+    q75: sorted[Math.floor(n * 0.75)].toFixed(4),
+    max: sorted[n - 1].toFixed(4),
+  }
+}
+
+function StatisticalSummaryAdvanced() {
+  const [data, setData] = useState(null)
+  const [selectedCol, setSelectedCol] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
+  const fileRef = useRef(null)
+  const canvasRef = useRef(null)
+
+  const handleFile = useCallback(file => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = e => {
+      const parsed = parseCSV(e.target.result)
+      if (!parsed) return
+      const numericCols = parsed.headers.filter(h => parsed.rows.some(r => typeof r[h] === 'number'))
+      setData(parsed)
+      setSelectedCol(numericCols[0] || parsed.headers[0])
+    }
+    reader.readAsText(file)
+  }, [])
+
+  const onDrop = e => {
+    e.preventDefault(); setDragOver(false)
+    const file = e.dataTransfer.files[0]
+    if (file?.name.endsWith('.csv')) handleFile(file)
+  }
+
+  // Draw histogram on canvas whenever selection changes
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !data || !selectedCol) return
+    const vals = data.rows.map(r => r[selectedCol]).filter(v => typeof v === 'number')
+    if (!vals.length) return
+
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width, H = canvas.height
+    ctx.clearRect(0, 0, W, H)
+
+    const min = Math.min(...vals), max = Math.max(...vals)
+    const BINS = 20
+    const binW = (max - min) / BINS || 1
+    const bins = Array(BINS).fill(0)
+    vals.forEach(v => { const b = Math.min(BINS - 1, Math.floor((v - min) / binW)); bins[b]++ })
+    const maxBin = Math.max(...bins)
+
+    const pad = { l: 36, r: 12, t: 16, b: 28 }
+    const gW = W - pad.l - pad.r, gH = H - pad.t - pad.b
+    const bw = gW / BINS
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + gH)
+    ctx.lineTo(pad.l + gW, pad.t + gH)
+    ctx.stroke()
+
+    bins.forEach((count, i) => {
+      const x = pad.l + i * bw
+      const bh = (count / maxBin) * gH
+      const grad = ctx.createLinearGradient(0, pad.t + gH - bh, 0, pad.t + gH)
+      grad.addColorStop(0, 'rgba(99,102,241,0.8)')
+      grad.addColorStop(1, 'rgba(99,102,241,0.2)')
+      ctx.fillStyle = grad
+      ctx.fillRect(x + 1, pad.t + gH - bh, bw - 2, bh)
+    })
+
+    ctx.fillStyle = 'rgba(255,255,255,0.35)'
+    ctx.font = '9px monospace'
+    ctx.textAlign = 'center'
+    ;[0, 0.5, 1].forEach(t => {
+      const v = min + t * (max - min)
+      ctx.fillText(v.toFixed(1), pad.l + t * gW, H - 5)
+    })
+  }, [data, selectedCol])
+
+  const stats = data && selectedCol ? colStats(data.rows, selectedCol) : null
+  const numericCols = data?.headers.filter(h => data.rows.some(r => typeof r[h] === 'number')) ?? []
+
+  if (!data) {
+    return (
+      <div className="space-y-4">
+        <div
+          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          onClick={() => fileRef.current?.click()}
+          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${dragOver ? 'border-accent-indigo bg-accent-indigo/10' : 'border-white/15 hover:border-accent-indigo/50 hover:bg-accent-indigo/5'}`}
+        >
+          <div className="text-3xl mb-3">📁</div>
+          <p className="text-sm font-mono text-text-muted">Drop a CSV file here, or click to browse</p>
+          <p className="text-[10px] font-mono text-text-muted/50 mt-1">Reads entirely in your browser — no upload to any server</p>
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={e => handleFile(e.target.files[0])} />
+        </div>
+        <p className="text-[10px] font-mono text-text-muted text-center">No CSV? Try any dataset from UCI ML Repository or Kaggle.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="text-xs font-mono text-text-muted">
+          <span className="text-accent-indigo">{data.rows.length}</span> rows · <span className="text-accent-cyan">{data.headers.length}</span> columns
+        </div>
+        <button
+          onClick={() => { setData(null); setSelectedCol(null) }}
+          className="text-[10px] font-mono text-text-muted hover:text-text-primary border border-white/10 px-2 py-1 rounded-lg hover:border-white/20 transition-all cursor-none"
+        >
+          Load new CSV
+        </button>
+      </div>
+
+      {numericCols.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {numericCols.slice(0, 12).map(col => (
+            <button
+              key={col}
+              onClick={() => setSelectedCol(col)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-all cursor-none ${selectedCol === col ? 'bg-accent-indigo/20 border-accent-indigo/50 text-text-primary' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/20'}`}
+            >
+              {col}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selectedCol && (
+        <>
+          <canvas
+            ref={canvasRef}
+            width={520}
+            height={220}
+            className="w-full rounded-xl bg-bg-primary/40 border border-white/5"
+            style={{ minHeight: 180 }}
+          />
+          {stats ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {[
+                { label: 'Count', val: stats.n },
+                { label: 'Missing', val: stats.missing, color: stats.missing > 0 ? 'text-yellow-400' : 'text-text-primary' },
+                { label: 'Mean', val: stats.mean },
+                { label: 'Std Dev', val: stats.std },
+                { label: 'Min', val: stats.min, color: 'text-accent-cyan' },
+                { label: 'Median', val: stats.median },
+                { label: 'Max', val: stats.max, color: 'text-accent-violet' },
+                { label: 'Q75', val: stats.q75 },
+              ].map(s => (
+                <div key={s.label} className="glass rounded-lg p-2 border border-white/5 text-center">
+                  <div className="text-[9px] font-mono text-text-muted">{s.label}</div>
+                  <div className={`text-xs font-bold font-mono ${s.color ?? 'text-text-primary'}`}>{s.val}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs font-mono text-text-muted text-center">Select a numeric column to see statistics</p>
+          )}
+        </>
+      )}
+
+      {/* Data preview */}
+      <div className="overflow-x-auto rounded-xl border border-white/5">
+        <table className="w-full text-[9px] font-mono">
+          <thead>
+            <tr className="border-b border-white/10">
+              {data.headers.map(h => (
+                <th key={h} className="text-text-muted px-2 py-1.5 text-left whitespace-nowrap max-w-[100px] truncate">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.rows.slice(0, 5).map((row, i) => (
+              <tr key={i} className="border-b border-white/5">
+                {data.headers.map(h => (
+                  <td key={h} className="px-2 py-1 text-text-secondary max-w-[100px] truncate">{row[h] === null ? '—' : String(row[h])}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-[9px] font-mono text-text-muted text-center py-1.5">Showing first 5 rows of {data.rows.length}</p>
+      </div>
+    </div>
+  )
+}
+
 // ── Registry ──────────────────────────────────────────────────────────────────
-const COMPONENTS = {
+const COMPONENTS_MEDIUM = {
   DistributionExplorer,
   CorrelationHeatmap,
   OutlierDetection,
@@ -652,6 +874,18 @@ const COMPONENTS = {
   MissingData,
   StatisticalSummary,
 }
+
+const COMPONENTS_ADVANCED = {
+  DistributionExplorer,
+  CorrelationHeatmap,
+  OutlierDetection,
+  PCAVisualizer,
+  TSNEVisualizer,
+  MissingData,
+  StatisticalSummary: StatisticalSummaryAdvanced,
+}
+
+const COMPONENTS = isAdvancedDemo ? COMPONENTS_ADVANCED : COMPONENTS_MEDIUM
 
 export default function DataScienceDemos({ componentName }) {
   const Demo = COMPONENTS[componentName]

@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { isAdvancedDemo } from '../../config/demoTier'
+import { demoStream } from '../../services/demoApiService'
 
 // ── RAG Pipeline ──────────────────────────────────────────────────────────────
 const KNOWLEDGE_BASE = [
@@ -342,7 +344,7 @@ function EmbeddingSpace() {
           </div>
         ))}
       </div>
-      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 220 }}>
+      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 320, minHeight: 260 }}>
         {/* Axes */}
         <line x1={10} y1={100} x2={290} y2={100} stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
         <line x1={150} y1={10} x2={150} y2={190} stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
@@ -375,14 +377,235 @@ function EmbeddingSpace() {
   )
 }
 
+// ── Shared helper ─────────────────────────────────────────────────────────────
+async function animateText(fullText, setter, delayMs = 13) {
+  for (let i = 1; i <= fullText.length; i++) {
+    await new Promise(r => setTimeout(r, delayMs))
+    setter(fullText.slice(0, i))
+  }
+}
+
+// ── Advanced: Prompt Lab (real LLM streaming) ─────────────────────────────────
+function PromptLabAdvanced() {
+  const [style, setStyle] = useState('zeroshot')
+  const [input, setInput] = useState('The new update completely broke everything I relied on.')
+  const [output, setOutput] = useState('')
+  const [streaming, setStreaming] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const prompt = TEMPLATES[style].template.replace('{input}', input)
+
+  const run = useCallback(async () => {
+    setStreaming(true); setOutput(''); setError(null)
+    try {
+      const { text, provider: p } = await demoStream({
+        prompt,
+        systemPrompt:
+          'You are a language model completing prompts for educational AI demos. Follow the prompt format exactly. Respond concisely and directly without meta-commentary.',
+        temperature: 0.35,
+        maxTokens: 130,
+      })
+      setProvider(p)
+      await animateText(text, setOutput)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setStreaming(false)
+    }
+  }, [prompt])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 items-center">
+        {Object.entries(TEMPLATES).map(([k, { label }]) => (
+          <button
+            key={k}
+            onClick={() => { setStyle(k); setOutput(''); setError(null) }}
+            className={`px-2 py-1 rounded text-xs font-mono transition-all cursor-none ${style === k ? 'bg-accent-indigo text-white' : 'bg-white/5 text-text-muted hover:bg-white/10'}`}
+          >
+            {label}
+          </button>
+        ))}
+        {provider && (
+          <span className="ml-auto flex items-center gap-1 text-[10px] font-mono text-green-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            {provider}
+          </span>
+        )}
+      </div>
+
+      <div>
+        <label className="text-[10px] font-mono text-text-muted block mb-1">Input text:</label>
+        <input
+          value={input}
+          onChange={e => { setInput(e.target.value); setOutput(''); }}
+          className="w-full bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-text-primary focus:outline-none focus:border-accent-indigo/50"
+        />
+      </div>
+
+      <div className="code-block pt-8 text-xs font-mono text-accent-indigo leading-relaxed whitespace-pre-wrap">
+        <div className="absolute top-0 left-0 right-0 h-7 flex items-center gap-1.5 px-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+          <span className="ml-2 text-text-muted text-[10px]">prompt → {provider || 'LLM'}</span>
+        </div>
+        {prompt}
+        {output && <span className="text-accent-cyan"> {output}</span>}
+        {streaming && !output && <span className="text-accent-cyan animate-pulse"> ▌</span>}
+        {streaming && output && <span className="text-accent-cyan animate-pulse">▌</span>}
+      </div>
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          onClick={run}
+          disabled={streaming}
+          className="px-4 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {streaming ? '⟳ Generating…' : '▶ Run Real LLM'}
+        </button>
+        {error && (
+          <span className="text-[10px] font-mono text-yellow-400">
+            ⚠ {error.includes('No demo API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Advanced: RAG Pipeline (real LLM generation) ───────────────────────────────
+function RAGPipelineAdvanced() {
+  const [query, setQuery] = useState('What is RAG and how does it work?')
+  const [step, setStep] = useState(0)
+  const [retrieved, setRetrieved] = useState([])
+  const [response, setResponse] = useState('')
+  const [running, setRunning] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const tokenize = s => s.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/)
+  const score = (q, doc) => {
+    const qt = new Set(tokenize(q)), dt = new Set(tokenize(doc.text))
+    let overlap = 0; qt.forEach(w => dt.has(w) && overlap++)
+    return overlap / (qt.size || 1)
+  }
+
+  const STEPS = ['Idle', 'Query Embedding', 'Vector Search', 'Retrieve Top-K', 'Augment Prompt', 'LLM Generation']
+
+  const run = async () => {
+    setRunning(true); setStep(0); setRetrieved([]); setResponse(''); setError(null)
+    await new Promise(r => setTimeout(r, 500)); setStep(1)
+    await new Promise(r => setTimeout(r, 600)); setStep(2)
+    const scored = KNOWLEDGE_BASE.map(doc => ({ ...doc, score: score(query, doc) }))
+      .sort((a, b) => b.score - a.score).slice(0, 3)
+    setRetrieved(scored); setStep(3)
+    await new Promise(r => setTimeout(r, 500)); setStep(4)
+
+    const context = scored.map((d, i) => `[${i + 1}] ${d.text}`).join('\n')
+    const ragPrompt = `Context documents:\n${context}\n\nQuestion: ${query}\n\nAnswer using only the provided context. Be concise (2-3 sentences).`
+    try {
+      const { text, provider: p } = await demoStream({
+        prompt: ragPrompt,
+        systemPrompt: 'You are a RAG assistant. Answer questions strictly using the provided context documents. Cite document numbers when relevant.',
+        temperature: 0.2,
+        maxTokens: 180,
+      })
+      setProvider(p); setStep(5)
+      await animateText(text, setResponse, 11)
+    } catch (err) {
+      setError(err.message); setStep(5)
+    }
+    setRunning(false)
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="flex-1 bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-text-primary focus:outline-none focus:border-accent-indigo/50"
+          placeholder="Ask a question…"
+        />
+        <button
+          onClick={run}
+          disabled={running}
+          className="px-4 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {running ? '…' : 'Run RAG'}
+        </button>
+      </div>
+
+      <div className="flex items-center gap-1 overflow-x-auto py-1">
+        {STEPS.slice(1).map((s, i) => (
+          <div key={s} className="flex items-center gap-1">
+            <div className={`text-[9px] font-mono px-2 py-1 rounded whitespace-nowrap transition-all ${step > i ? 'bg-accent-indigo text-white' : step === i + 1 ? 'bg-accent-indigo/30 text-accent-indigo border border-accent-indigo/40 animate-pulse' : 'bg-white/5 text-text-muted'}`}>
+              {i + 1}. {s}
+            </div>
+            {i < STEPS.length - 2 && <span className="text-text-muted text-xs">→</span>}
+          </div>
+        ))}
+      </div>
+
+      {retrieved.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono text-text-muted">Retrieved (keyword similarity):</div>
+          {retrieved.map(d => (
+            <div key={d.id} className="glass rounded-lg p-2 border border-accent-indigo/10 flex gap-2">
+              <span className="text-[10px] font-mono text-accent-indigo w-12 shrink-0">score:{d.score.toFixed(2)}</span>
+              <p className="text-[10px] text-text-secondary">{d.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {(response || (step >= 5 && !error)) && (
+        <div className="glass rounded-xl p-4 border border-accent-cyan/20">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="text-[10px] font-mono text-accent-cyan">Real LLM Response</div>
+            {provider && (
+              <span className="text-[9px] font-mono text-green-400 flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />
+                {provider}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            {response}
+            {running && step >= 4 && <span className="animate-pulse text-accent-cyan">▌</span>}
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-[10px] font-mono text-yellow-400 text-center">
+          ⚠ {error.includes('No demo API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Registry ──────────────────────────────────────────────────────────────────
-const COMPONENTS = {
+const COMPONENTS_MEDIUM = {
   RAGPipeline,
   PromptLab,
   TemperatureEffect,
   TokenCounter,
   EmbeddingSpace,
 }
+
+const COMPONENTS_ADVANCED = {
+  RAGPipeline: RAGPipelineAdvanced,
+  PromptLab: PromptLabAdvanced,
+  TemperatureEffect,
+  TokenCounter,
+  EmbeddingSpace,
+}
+
+const COMPONENTS = isAdvancedDemo ? COMPONENTS_ADVANCED : COMPONENTS_MEDIUM
 
 export default function GenAIDemos({ componentName }) {
   const Demo = COMPONENTS[componentName]

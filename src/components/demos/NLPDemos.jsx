@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
+import { isAdvancedDemo } from '../../config/demoTier'
+import { demoStream } from '../../services/demoApiService'
 
 // ── Tokenizer ─────────────────────────────────────────────────────────────────
 function Tokenizer() {
@@ -354,7 +356,7 @@ function WordEmbeddings() {
 
   return (
     <div className="space-y-4">
-      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 200 }}>
+      <svg viewBox="0 0 300 200" className="w-full rounded-xl bg-bg-primary/40 border border-white/5" style={{ height: 320, minHeight: 260 }}>
         {Object.entries(words).map(([w, v]) => {
           const cx = toSX(v[0]), cy = toSY(v[1])
           const isSelected = w === sel1 || w === sel2
@@ -485,8 +487,230 @@ function NER() {
   )
 }
 
+// ── Advanced: Sentiment (real AI classification) ───────────────────────────────
+function SentimentAdvanced() {
+  const [text, setText] = useState('This product is absolutely amazing and I really love it! Great quality.')
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const analyze = async () => {
+    setLoading(true); setResult(null); setError(null)
+    try {
+      const { text: raw, provider: p } = await demoStream({
+        prompt:
+          `Analyze the sentiment of this text: "${text}"\n\nRespond with ONLY valid JSON (no markdown, no explanation outside JSON):\n{"label":"Positive","confidence":0.95,"key_phrases":["love","amazing"],"brief":"One-sentence explanation."}`,
+        systemPrompt: 'You are a sentiment analysis API. Output ONLY a single valid JSON object. No markdown code fences, no extra text.',
+        temperature: 0.05,
+        maxTokens: 140,
+      })
+      setProvider(p)
+      const jsonStr = raw.replace(/```json\n?|\n?```/g, '').trim()
+      setResult(JSON.parse(jsonStr))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { analyze() }, []) // auto-run on mount
+
+  const emoji = result ? (result.label === 'Positive' ? '😊' : result.label === 'Negative' ? '😞' : '😐') : null
+
+  return (
+    <div className="space-y-4">
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        rows={3}
+        className="w-full bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-indigo/50 resize-none"
+      />
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={analyze}
+          disabled={loading}
+          className="flex-1 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {loading ? '⟳ Analyzing with AI…' : '▶ Analyze Sentiment (Live AI)'}
+        </button>
+        {provider && <span className="text-[10px] font-mono text-green-400 flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />{provider}</span>}
+      </div>
+
+      {result && (
+        <>
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-4xl">{emoji}</span>
+            <div>
+              <div className={`text-xl font-bold font-mono ${result.label === 'Positive' ? 'text-green-400' : result.label === 'Negative' ? 'text-red-400' : 'text-text-muted'}`}>
+                {result.label}
+              </div>
+              <div className="text-xs font-mono text-text-muted">Confidence: {Math.round((result.confidence ?? 0) * 100)}%</div>
+            </div>
+            <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden relative">
+              <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/20" />
+              {result.label !== 'Negative'
+                ? <div className="absolute h-full bg-green-500 rounded-full transition-all duration-700" style={{ left: '50%', width: `${result.label === 'Positive' ? (result.confidence ?? 0.5) * 50 : 0}%` }} />
+                : <div className="absolute h-full bg-red-500 rounded-full transition-all duration-700" style={{ right: '50%', width: `${(result.confidence ?? 0.5) * 50}%` }} />}
+            </div>
+          </div>
+
+          {result.key_phrases?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 p-3 bg-bg-primary/40 rounded-xl border border-white/5">
+              {result.key_phrases.map((phrase, i) => (
+                <span
+                  key={i}
+                  className={`px-2 py-0.5 rounded text-xs font-mono border ${
+                    result.label === 'Positive' ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                    : result.label === 'Negative' ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                    : 'bg-white/5 border-white/10 text-text-muted'
+                  }`}
+                >
+                  {phrase}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {result.brief && (
+            <div className="glass rounded-lg p-3 border border-white/5">
+              <div className="text-[10px] font-mono text-text-muted mb-1">AI Explanation:</div>
+              <p className="text-xs text-text-secondary leading-relaxed">{result.brief}</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {error && (
+        <div className="text-[10px] font-mono text-yellow-400 text-center">
+          ⚠ {error.includes('No demo API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Advanced: NER (real AI entity extraction) ──────────────────────────────────
+function NERAdvanced() {
+  const [text, setText] = useState('Elon Musk founded Tesla and SpaceX in California. He met Sundar Pichai in New York last Tuesday.')
+  const [entities, setEntities] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [provider, setProvider] = useState(null)
+
+  const analyze = async () => {
+    setLoading(true); setEntities(null); setError(null)
+    try {
+      const { text: raw, provider: p } = await demoStream({
+        prompt:
+          `Extract named entities from this text: "${text}"\n\nRespond with ONLY a JSON array (no markdown):\n[{"entity":"Elon Musk","type":"PERSON"},{"entity":"Tesla","type":"ORG"}]\nAllowed types: PERSON, ORG, LOC, DATE, MISC.`,
+        systemPrompt: 'You are a named entity recognition API. Output ONLY a valid JSON array of entity objects. No markdown, no extra text.',
+        temperature: 0.05,
+        maxTokens: 200,
+      })
+      setProvider(p)
+      const jsonStr = raw.replace(/```json\n?|\n?```/g, '').trim()
+      const parsed = JSON.parse(jsonStr)
+      const found = []
+      parsed.forEach(({ entity, type }) => {
+        let idx = text.indexOf(entity)
+        while (idx !== -1) {
+          found.push({ text: entity, type, start: idx, end: idx + entity.length })
+          idx = text.indexOf(entity, idx + 1)
+        }
+      })
+      found.sort((a, b) => a.start - b.start)
+      setEntities(found)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { analyze() }, [])
+
+  const TYPE_COLORS = { PERSON: '#6366f1', ORG: '#06b6d4', LOC: '#22c55e', DATE: '#f59e0b', MISC: '#a855f7' }
+
+  const renderHighlighted = () => {
+    if (!entities) return <span className="text-text-secondary">{text}</span>
+    const parts = []
+    let last = 0
+    entities.forEach(({ text: t, type, start, end }) => {
+      if (start >= last) {
+        if (start > last) parts.push(<span key={`t${start}`} className="text-text-secondary">{text.slice(last, start)}</span>)
+        const color = TYPE_COLORS[type] || '#94a3b8'
+        parts.push(
+          <span
+            key={`e${start}`}
+            className="rounded px-1 py-0.5 mx-0.5 text-xs font-bold"
+            style={{ background: color + '33', border: `1px solid ${color}55`, color }}
+          >
+            {t} <span className="text-[8px] opacity-70">[{type}]</span>
+          </span>
+        )
+        last = end
+      }
+    })
+    if (last < text.length) parts.push(<span key="tail" className="text-text-secondary">{text.slice(last)}</span>)
+    return parts
+  }
+
+  return (
+    <div className="space-y-4">
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        rows={3}
+        className="w-full bg-bg-primary/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-indigo/50 resize-none"
+      />
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={analyze}
+          disabled={loading}
+          className="flex-1 py-2 rounded-lg text-xs font-mono bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30 hover:bg-accent-indigo/30 disabled:opacity-50 transition-all cursor-none"
+        >
+          {loading ? '⟳ Extracting entities…' : '▶ Extract Entities (Live AI)'}
+        </button>
+        {provider && <span className="text-[10px] font-mono text-green-400 flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />{provider}</span>}
+      </div>
+
+      <div className="p-3 bg-bg-primary/40 rounded-xl border border-white/5 text-sm leading-8 min-h-16">
+        {loading
+          ? <span className="text-text-muted text-xs font-mono animate-pulse">Analyzing…</span>
+          : renderHighlighted()}
+      </div>
+
+      {entities && (
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(TYPE_COLORS).map(([type, color]) => {
+            const count = entities.filter(e => e.type === type).length
+            if (!count) return null
+            return (
+              <div key={type} className="flex items-center gap-1.5 text-xs font-mono">
+                <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+                <span style={{ color }}>{type}</span>
+                <span className="text-text-muted">({count})</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {error && (
+        <div className="text-[10px] font-mono text-yellow-400 text-center">
+          ⚠ {error.includes('No demo API') || error.includes('503') ? 'Set VITE_* keys or run vercel dev' : error}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Registry ──────────────────────────────────────────────────────────────────
-const COMPONENTS = {
+const COMPONENTS_MEDIUM = {
   Tokenizer,
   TFIDF,
   CosineSimilarity,
@@ -494,6 +718,17 @@ const COMPONENTS = {
   WordEmbeddings,
   NER,
 }
+
+const COMPONENTS_ADVANCED = {
+  Tokenizer,
+  TFIDF,
+  CosineSimilarity,
+  Sentiment: SentimentAdvanced,
+  WordEmbeddings,
+  NER: NERAdvanced,
+}
+
+const COMPONENTS = isAdvancedDemo ? COMPONENTS_ADVANCED : COMPONENTS_MEDIUM
 
 export default function NLPDemos({ componentName }) {
   const Demo = COMPONENTS[componentName]
