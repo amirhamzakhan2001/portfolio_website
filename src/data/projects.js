@@ -69,7 +69,7 @@ The hardest problem was implementing barge-in detection — I used WebRTC + Sile
     glowColor: 'rgba(6,182,212,0.3)',
     icon: '🤖',
     github: 'https://github.com/amirhamzakhan2001/AI-Powered-Quiz',
-    demo: 'https://www.linkedin.com/posts/amirhamzakhan032001_aiforeducation-ruraleducation-ibm-activity-7360917291905019904-lbSV',
+    demo: 'https://ai-powered-quiz-afq1.onrender.com',
     status: 'public',
     featured: false,
   },
