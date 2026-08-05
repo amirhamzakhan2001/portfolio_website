@@ -9,7 +9,10 @@ import { useEffect, useRef } from 'react'
  */
 export function useReveal(options = {}) {
   const ref = useRef(null)
-  const { selector = '.reveal', stagger = 70, threshold = 0.18 } = options
+  // Fire as soon as an element edges into view. A strict threshold leaves a
+  // band of invisible content just below the fold, which on a light ground
+  // reads as a broken page rather than as content waiting to animate.
+  const { selector = '.rv', stagger = 60, threshold = 0.02 } = options
 
   useEffect(() => {
     const root = ref.current
@@ -37,11 +40,21 @@ export function useReveal(options = {}) {
           if (--remaining === 0) io.disconnect()
         })
       },
-      { threshold, rootMargin: '0px 0px -8% 0px' }
+      { threshold, rootMargin: '0px 0px -48px 0px' }
     )
 
     targets.forEach((el) => io.observe(el))
-    return () => io.disconnect()
+
+    // Safety net: if anything prevents the observer from ever firing, the page
+    // must not stay blank. Reveal whatever is still hidden after 2.5s.
+    const failsafe = setTimeout(() => {
+      targets.forEach((el) => el.classList.add('is-on'))
+    }, 2500)
+
+    return () => {
+      clearTimeout(failsafe)
+      io.disconnect()
+    }
   }, [selector, stagger, threshold])
 
   return ref

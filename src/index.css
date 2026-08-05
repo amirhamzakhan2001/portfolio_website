@@ -1,5 +1,11 @@
-/* ── SIGNAL · base layer ─────────────────────────────────────────────── */
+/* ── LAUNCH · base layer ─────────────────────────────────────────────── */
 
+@font-face {
+  font-family: 'Anton';
+  src: url('/fonts/anton.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 @font-face {
   font-family: 'Familjen Grotesk';
   src: url('/fonts/familjen-vf.woff2') format('woff2-variations');
@@ -7,17 +13,9 @@
   font-display: swap;
 }
 @font-face {
-  font-family: 'Newsreader';
-  src: url('/fonts/newsreader-vf.woff2') format('woff2-variations');
-  font-weight: 200 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Newsreader';
-  src: url('/fonts/newsreader-italic-vf.woff2') format('woff2-variations');
-  font-weight: 200 800;
-  font-style: italic;
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-vf.woff2') format('woff2-variations');
+  font-weight: 100 900;
   font-display: swap;
 }
 @font-face {
@@ -33,11 +31,12 @@
 
 @layer base {
   :root {
-    --nav-h: 4.25rem;
+    --nav-h: 4rem;
+    color-scheme: light;
   }
 
   * {
-    @apply border-edge;
+    @apply border-line;
   }
 
   html {
@@ -45,14 +44,12 @@
   }
 
   body {
-    @apply bg-void text-ink font-display antialiased;
+    @apply bg-paper text-ink font-body antialiased;
     font-size: 17px;
-    line-height: 1.65;
+    line-height: 1.6;
     overflow-x: hidden;
-    font-synthesis-weight: none;
   }
 
-  /* Lenis owns scrolling; these are its required hooks */
   html.lenis,
   html.lenis body {
     height: auto;
@@ -60,110 +57,104 @@
   .lenis.lenis-smooth {
     scroll-behavior: auto !important;
   }
-  .lenis.lenis-stopped {
-    overflow: hidden;
-  }
 
   ::selection {
-    @apply bg-signal text-void;
+    @apply bg-blaze text-paper;
   }
 
   :focus-visible {
-    outline: 2px solid theme('colors.signal.DEFAULT');
-    outline-offset: 3px;
-    border-radius: 1px;
+    outline: 3px solid theme('colors.volt.DEFAULT');
+    outline-offset: 2px;
   }
 
-  h1, h2, h3, h4 {
-    @apply font-display font-semibold;
-    text-wrap: balance;
-  }
-
-  /* Numeric readouts always align */
   .tnum {
     font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
-  /* ── layout ── */
   .shell {
     @apply mx-auto w-full max-w-shell px-gutter;
   }
 
-  .movement {
-    @apply relative py-movement;
+  .beat {
+    @apply relative py-beat;
   }
 
-  .rail {
-    @apply font-mono text-micro uppercase text-mute;
+  /* ── the headline face. Anton is caps-only by design intent here ── */
+  .mega {
+    @apply font-mega uppercase text-ink;
+    font-weight: 400;
   }
 
-  /* the one label style in the system — a channel name on a mixing desk */
-  .chan {
-    @apply font-mono text-micro uppercase tracking-[0.16em] text-signal;
+  /* ── eyebrow labels ── */
+  .eyebrow {
+    @apply font-mono text-micro font-medium uppercase text-blaze;
+  }
+  .eyebrow-mute {
+    @apply font-mono text-micro uppercase text-ink3;
   }
 
-  .rule {
-    @apply h-px w-full bg-edge;
+  /* ── the chip: hard-edged, no pill shapes anywhere ── */
+  .chip {
+    @apply inline-flex items-center rounded-chip border border-line bg-sheet px-2.5 py-1 font-mono text-[0.66rem] uppercase tracking-wider text-ink2;
   }
 
-  .panel {
-    @apply rounded-panel border border-edge bg-panel;
+  /* ── buttons: heavy, offset, physical ── */
+  .btn {
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-ink px-5 py-3 font-ui text-[0.82rem] font-semibold uppercase tracking-wider text-paper transition-all duration-fast ease-snap;
+  }
+  .btn:hover {
+    @apply -translate-x-0.5 -translate-y-0.5 bg-blaze border-blaze shadow-hard;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-transparent px-5 py-3 font-ui text-[0.82rem] font-semibold uppercase tracking-wider text-ink transition-all duration-fast ease-snap;
+  }
+  .btn-ghost:hover {
+    @apply -translate-x-0.5 -translate-y-0.5 shadow-hard;
   }
 
-  .prose-signal {
-    @apply max-w-measure font-serif text-lead text-dim;
+  .rule-h {
+    @apply h-px w-full bg-line;
   }
-  .prose-signal strong {
-    @apply font-medium text-ink;
-  }
-  .prose-signal em {
-    @apply italic text-ink;
+  .rule-thick {
+    @apply h-0.5 w-full bg-ink;
   }
 
-  .link {
-    @apply relative inline-block text-ink no-underline transition-colors duration-attack;
-  }
-  .link::after {
-    content: '';
-    @apply absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-signal transition-transform duration-settle ease-signal;
-  }
-  .link:hover {
-    @apply text-signal;
-  }
-  .link:hover::after {
-    @apply origin-left scale-x-100;
-  }
-
-  /* reveal: content is written in along the signal's attack envelope */
-  .reveal {
+  /* ── reveal ── */
+  .rv {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(28px);
     transition:
-      opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
   }
-  .reveal.is-on {
+  .rv.is-on {
     opacity: 1;
     transform: none;
   }
 }
 
 @layer utilities {
-  .grain::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.5;
-    background-image: radial-gradient(circle at 1px 1px, rgba(232, 230, 225, 0.05) 1px, transparent 0);
-    background-size: 4px 4px;
+  /* diagonal speed hatch — the graphic motif, used sparingly */
+  .hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      theme('colors.blaze.DEFAULT') 0 2px,
+      transparent 2px 7px
+    );
+  }
+  .dotgrid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(10, 10, 10, 0.13) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .stroke-text {
+    -webkit-text-stroke: 2px theme('colors.ink');
+    color: transparent;
   }
 }
 
-/* Motion opt-out is a design, not a switch: everything arrives, nothing travels. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -171,9 +162,8 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
   }
-  .reveal {
+  .rv {
     opacity: 1;
     transform: none;
   }
