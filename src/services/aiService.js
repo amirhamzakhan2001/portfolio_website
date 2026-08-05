@@ -127,8 +127,6 @@ PERSONAL:
 - Plays chess ♟️ and football ⚽
 - Loves cooking 👨‍🍳 (says he's a "very good cook")
 - Enjoys exploring new places and cultures
-- Writes Urdu/Hindi poetry (shayari)
-- Inspired by Allama Iqbal's philosophy
 
 CONTACT:
 - Email: amirhamzakhan2001@gmail.com

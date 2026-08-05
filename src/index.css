@@ -1,289 +1,180 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+/* ── SIGNAL · base layer ─────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Familjen Grotesk';
+  src: url('/fonts/familjen-vf.woff2') format('woff2-variations');
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader-vf.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader-italic-vf.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-vf.woff2') format('woff2-variations');
+  font-weight: 100 800;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-primary: #050508;
-  --bg-secondary: #0A0A14;
-  --bg-tertiary: #0F0F1E;
-  --accent-indigo: #6366F1;
-  --accent-violet: #8B5CF6;
-  --accent-cyan: #06B6D4;
-  --accent-purple: #A855F7;
-  --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --text-muted: #64748B;
+@layer base {
+  :root {
+    --nav-h: 4.25rem;
+  }
+
+  * {
+    @apply border-edge;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-void text-ink font-display antialiased;
+    font-size: 17px;
+    line-height: 1.65;
+    overflow-x: hidden;
+    font-synthesis-weight: none;
+  }
+
+  /* Lenis owns scrolling; these are its required hooks */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  ::selection {
+    @apply bg-signal text-void;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.signal.DEFAULT');
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display font-semibold;
+    text-wrap: balance;
+  }
+
+  /* Numeric readouts always align */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer components {
+  /* ── layout ── */
+  .shell {
+    @apply mx-auto w-full max-w-shell px-gutter;
+  }
+
+  .movement {
+    @apply relative py-movement;
+  }
+
+  .rail {
+    @apply font-mono text-micro uppercase text-mute;
+  }
+
+  /* the one label style in the system — a channel name on a mixing desk */
+  .chan {
+    @apply font-mono text-micro uppercase tracking-[0.16em] text-signal;
+  }
+
+  .rule {
+    @apply h-px w-full bg-edge;
+  }
+
+  .panel {
+    @apply rounded-panel border border-edge bg-panel;
+  }
+
+  .prose-signal {
+    @apply max-w-measure font-serif text-lead text-dim;
+  }
+  .prose-signal strong {
+    @apply font-medium text-ink;
+  }
+  .prose-signal em {
+    @apply italic text-ink;
+  }
+
+  .link {
+    @apply relative inline-block text-ink no-underline transition-colors duration-attack;
+  }
+  .link::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-signal transition-transform duration-settle ease-signal;
+  }
+  .link:hover {
+    @apply text-signal;
+  }
+  .link:hover::after {
+    @apply origin-left scale-x-100;
+  }
+
+  /* reveal: content is written in along the signal's attack envelope */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-on {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+@layer utilities {
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: radial-gradient(circle at 1px 1px, rgba(232, 230, 225, 0.05) 1px, transparent 0);
+    background-size: 4px 4px;
+  }
 }
 
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
-  overflow-x: hidden;
-  cursor: none;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--accent-indigo);
-  border-radius: 2px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-violet);
-}
-
-/* Custom cursor */
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent-indigo);
-  border-radius: 50%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  transition: transform 0.1s ease;
-  box-shadow: 0 0 10px var(--accent-indigo), 0 0 20px rgba(99,102,241,0.4);
-}
-
-.cursor-ring {
-  width: 32px;
-  height: 32px;
-  border: 1.5px solid rgba(99,102,241,0.6);
-  border-radius: 50%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9998;
-  transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
-}
-
-.cursor-ring.hovered {
-  width: 48px;
-  height: 48px;
-  border-color: var(--accent-cyan);
-  background: rgba(6,182,212,0.05);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #6366F1, #A855F7, #06B6D4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-indigo {
-  background: linear-gradient(90deg, #6366F1, #8B5CF6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glass card */
-.glass {
-  background: rgba(15, 15, 30, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-}
-
-.glass:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
-}
-
-/* Glow border animation */
-.glow-border {
-  position: relative;
-}
-
-.glow-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #6366F1, #A855F7, #06B6D4);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.glow-border:hover::before {
-  opacity: 1;
-}
-
-/* Section common styles */
-.section-label {
-  font-family: 'Fira Code', monospace;
-  font-size: 0.75rem;
-  color: var(--accent-cyan);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-
-/* Scroll progress bar */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #6366F1, #A855F7, #06B6D4);
-  z-index: 1000;
-  transition: width 0.1s linear;
-}
-
-/* Noise texture overlay */
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-}
-
-/* Code block styling */
-.code-block {
-  font-family: 'Fira Code', monospace;
-  background: rgba(10, 10, 20, 0.9);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 12px;
-  padding: 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Theory math in demo viewer — no duplicate title bar; room for multi-line formulas */
-.theory-formula {
-  font-family: 'Fira Code', monospace;
-  background: rgba(10, 10, 20, 0.9);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 12px;
-  padding: 2.75rem 1.25rem 1.35rem;
-  position: relative;
-  overflow-x: auto;
-  overflow-y: visible;
-  min-height: 7.5rem;
-}
-
-.code-block::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 32px;
-  background: rgba(15, 15, 30, 0.8);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
-  border-radius: 12px 12px 0 0;
-}
-
-/* Syntax highlight colors */
-.code-keyword { color: #A855F7; }
-.code-string { color: #34D399; }
-.code-var { color: #818CF8; }
-.code-comment { color: #64748B; }
-.code-bracket { color: #06B6D4; }
-.code-key { color: #F8FAFC; }
-
-/* Typing cursor */
-.typing-cursor::after {
-  content: '|';
-  animation: blink 0.75s step-end infinite;
-  color: var(--accent-cyan);
-}
-
-/* Tag / chip styles */
-.tech-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-family: 'Fira Code', monospace;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: #818CF8;
-  transition: all 0.2s ease;
-}
-
-.tech-chip:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.5);
-  color: var(--text-primary);
-}
-
-/* Section divider */
-.section-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent);
-  margin: 0 auto;
-}
-
-/* Urdu text */
-.urdu-text {
-  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
-  direction: rtl;
-  font-size: 1.1rem;
-  color: rgba(129, 140, 248, 0.7);
-  letter-spacing: 0;
-  line-height: 2;
-}
-
-/* Shimmer effect */
-.shimmer-effect {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(99,102,241,0.1) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s linear infinite;
-}
-
-/* Selection color */
-::selection {
-  background: rgba(99,102,241,0.3);
-  color: var(--text-primary);
-}
-
-/* Mobile touch — use default cursor */
-@media (hover: none) {
-  body { cursor: default; }
-  .cursor-dot, .cursor-ring { display: none; }
-}
-
-/* Demo canvas container */
-.demo-canvas {
-  width: 100%;
-  min-height: 280px;
-  height: 100%;
-  border-radius: 8px;
-  cursor: crosshair;
+/* Motion opt-out is a design, not a switch: everything arrives, nothing travels. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }

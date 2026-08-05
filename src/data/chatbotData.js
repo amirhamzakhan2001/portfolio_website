@@ -10,7 +10,6 @@ export const botPersonality = {
     "That's outside what I know. Ask me about Amir's work in AI/ML, his projects, or how to contact him.",
     "Interesting question, but I'm specialized in Amir's professional profile. What would you like to know about him?",
   ],
-  urduEasterEgg: "خودی کو کر بلند اتنا کہ ہر تقدیر سے پہلے، خدا بندے سے خود پوچھے بتا تیری رضا کیا ہے — Allama Iqbal. Amir lives by this: rise so high that God himself asks what you desire.",
   thinking: ['Thinking...', 'Let me check...', 'Processing...', 'One moment...'],
 }
 
@@ -112,10 +111,6 @@ export const qaDatabase = [
   {
     patterns: ['chess', 'football', 'sport', 'game'],
     answer: "Amir plays both chess and football. Chess keeps his strategic thinking sharp — which probably explains his approach to complex ML system architecture. Football for the team coordination skills!",
-  },
-  {
-    patterns: ['urdu', 'shayari', 'poetry', 'iqbal'],
-    answer: botPersonality.urduEasterEgg,
   },
   // Contact
   {
