@@ -265,11 +265,11 @@ export const FOUNDATIONS = [
 
 /** The arc, in order, for the progression strip. */
 export const PROGRESSION = [
-  { step: 'Analytics', label: 'Excel · SQL · BI', color: '#2A5BD7' },
-  { step: 'Machine learning', label: 'ML · deep learning', color: '#0E9384' },
-  { step: 'NLP', label: 'Language models', color: '#B54708' },
-  { step: 'Generative AI', label: 'LLM apps · agents', color: '#7839EE' },
-  { step: 'Production', label: 'Shipped products', color: '#BA2D5B' },
+  { step: 'Analytics', label: 'Excel · SQL · BI', color: '#0E9384' },
+  { step: 'Machine learning', label: 'ML · deep learning', color: '#B54708' },
+  { step: 'NLP', label: 'Language models', color: '#7839EE' },
+  { step: 'Generative AI', label: 'LLM apps · agents', color: '#BA2D5B' },
+  { step: 'Production', label: 'Shipped products', color: '#2A5BD7' },
 ]
 
 export const PROJECT_COUNT = PROJECTS.length + FOUNDATIONS.length

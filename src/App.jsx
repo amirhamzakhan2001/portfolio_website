@@ -1,15 +1,33 @@
-import { useLenis } from './lib/useLenis'
-import Sidebar from './components/app/Sidebar'
-import Topbar from './components/app/Topbar'
-import Overview from './components/views/Overview'
-import Projects from './components/views/Projects'
-import Foundations from './components/views/Foundations'
-import Skills from './components/views/Skills'
-import Timeline from './components/views/Timeline'
-import Contact from './components/views/Contact'
+import { useGSAP, ScrollSmoother, ScrollTrigger, reduced, armFailsafe } from './lib/motion'
+import Nav from './components/Nav'
+import Hero from './components/sections/Hero'
+import Signal from './components/sections/Signal'
+import Work from './components/sections/Work'
+import Stack from './components/sections/Stack'
+import Path from './components/sections/Path'
+import Contact from './components/sections/Contact'
 
 export default function App() {
-  useLenis()
+  useGSAP(() => {
+    // Fail open: if the frame loop never runs, show everything anyway.
+    const disarm = armFailsafe(4000)
+
+    // Smoothing is motion — anyone who opted out gets native scrolling.
+    if (reduced()) return disarm
+
+    ScrollSmoother.create({
+      wrapper: '#smooth-wrapper',
+      content: '#smooth-content',
+      smooth: 1.1,
+      effects: true,
+      normalizeScroll: true,
+    })
+
+    // fonts change text metrics, which changes every pinned distance
+    document.fonts?.ready.then(() => ScrollTrigger.refresh())
+
+    return disarm
+  })
 
   return (
     <>
@@ -20,22 +38,21 @@ export default function App() {
         Skip to content
       </a>
 
-      <Topbar />
-      <Sidebar />
+      {/* Nav sits outside the smoother — fixed elements inside get transformed */}
+      <Nav />
 
-      <main
-        id="main"
-        className="px-4 pb-16 pt-[calc(var(--top-h)+3.25rem)] lg:pl-[calc(var(--rail-w)+1.5rem)] lg:pr-6 lg:pt-[calc(var(--top-h)+1.25rem)]"
-      >
-        <div className="mx-auto w-full max-w-content">
-          <Overview />
-          <Projects />
-          <Foundations />
-          <Skills />
-          <Timeline />
-          <Contact />
+      <div id="smooth-wrapper">
+        <div id="smooth-content">
+          <main id="main">
+            <Hero />
+            <Signal />
+            <Work />
+            <Stack />
+            <Path />
+            <Contact />
+          </main>
         </div>
-      </main>
+      </div>
     </>
   )
 }

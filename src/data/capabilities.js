@@ -24,7 +24,7 @@ export const CAPABILITY_GROUPS = [
   {
     id: 'lang',
     label: 'Languages, tools & delivery',
-    color: '#2A5BD7',
+    color: '#B54708',
     items: [
       ['Python', 1], ['SQL', 1], ['FastAPI', 1], ['React Native', 1], ['Docker', 1],
       ['Git', 1], ['REST APIs', 1], ['Webhooks', 1], ['Vercel', 1], ['Render', 1],
@@ -47,7 +47,7 @@ export const CAPABILITY_GROUPS = [
   {
     id: 'genai',
     label: 'Generative AI & LLMs',
-    color: '#B54708',
+    color: '#BA2D5B',
     items: [
       ['LangChain', 1], ['LangGraph', 1], ['Agentic AI', 1], ['Multi-agent systems', 1],
       ['RAG', 1], ['Knowledge bases', 1], ['Chunking strategies', 1], ['Text embeddings', 1],
@@ -72,7 +72,7 @@ export const CAPABILITY_GROUPS = [
   {
     id: 'data',
     label: 'Data, analytics & databases',
-    color: '#BA2D5B',
+    color: '#2A5BD7',
     items: [
       ['Pandas', 1], ['NumPy', 1], ['PostgreSQL', 1], ['MongoDB', 1], ['FAISS', 1],
       ['Qdrant', 1], ['Power BI', 1], ['Tableau', 1], ['Excel', 1],
