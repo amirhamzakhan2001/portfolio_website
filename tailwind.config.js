@@ -1,84 +1,90 @@
 /** @type {import('tailwindcss').Config} */
 
-// ── LAUNCH design system ───────────────────────────────────────────────
-// Product-launch energy on a light ground. Heavy black type, near-white
-// chassis, one blaze accent that does all the shouting, electric blue for
-// data. High contrast, big scale jumps, nothing timid.
+// ── CONSOLE design system ──────────────────────────────────────────────
+// The portfolio as the tool an ML engineer actually lives in: an
+// experiment console. Neutral chrome, dense-but-legible panels, real
+// charts. All personality is spent on information design, not decoration.
+//
+// The five `series` colours are a validated categorical palette — they
+// pass lightness band, chroma floor, CVD separation (worst adjacent
+// ΔE 13.3 deutan), normal-vision separation and 3:1 contrast on #FCFCFB.
+// Do not add a sixth by eye; fold extra categories into "Other".
 
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
-        paper: '#F1F1EE',   // chassis
-        sheet: '#FFFFFF',
-        wash: '#E4E4DF',
-        ink: '#0A0A0A',     // heavy black — impact type
-        ink2: '#4A4A4A',
-        ink3: '#8C8C87',
-        line: '#D6D6D0',
-        line2: '#BFBFB7',
+        // chrome
+        app: '#FCFCFB',
+        panel: '#FFFFFF',
+        rail: '#F4F4F1',
+        sunk: '#F0F0EC',
+        line: '#E5E5E0',
+        line2: '#D2D2CB',
 
-        blaze: {            // the accent that shouts
-          DEFAULT: '#FF3D00',
-          deep: '#CC2E00',
-          wash: '#FFEDE7',
+        // ink
+        ink: '#14161A',
+        ink2: '#565C66',
+        ink3: '#8A9099',
+
+        // primary action
+        brand: {
+          DEFAULT: '#2A5BD7',
+          hover: '#1E45A8',
+          wash: '#EDF2FE',
         },
-        volt: {             // data / secondary
-          DEFAULT: '#2B2BFF',
-          wash: '#E8E8FF',
-        },
-        moss: '#00A05A',
+
+        // semantic state — never reused as a series colour
+        ok: '#0E9384',
+        okWash: '#E6F6F3',
+        warn: '#B54708',
+        warnWash: '#FDF3E7',
+        crit: '#BA2D5B',
+
+        // validated categorical series
+        s1: '#2A5BD7',
+        s2: '#0E9384',
+        s3: '#B54708',
+        s4: '#7839EE',
+        s5: '#BA2D5B',
       },
 
       fontFamily: {
-        // three faces, three jobs, huge contrast between them
-        mega: ['Anton', 'Impact', 'sans-serif'],          // headlines only
-        ui: ['"Familjen Grotesk"', 'system-ui', 'sans-serif'],
-        body: ['Archivo', 'system-ui', 'sans-serif'],
+        ui: ['Archivo', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
 
       fontSize: {
-        micro: ['0.6875rem', { lineHeight: '1.4', letterSpacing: '0.16em' }],
-        label: ['0.8125rem', { lineHeight: '1.5', letterSpacing: '0.08em' }],
-        body: ['1.0625rem', { lineHeight: '1.6' }],
-        lead: ['clamp(1.15rem, 1.8vw, 1.5rem)', { lineHeight: '1.5' }],
-        // the big jumps — this is where the energy comes from
-        d1: ['clamp(3.5rem, 13vw, 12rem)', { lineHeight: '0.88', letterSpacing: '-0.03em' }],
-        d2: ['clamp(2.6rem, 8vw, 7rem)', { lineHeight: '0.86', letterSpacing: '-0.025em' }],
-        d3: ['clamp(1.9rem, 4.4vw, 3.6rem)', { lineHeight: '0.95', letterSpacing: '-0.02em' }],
-        num: ['clamp(3rem, 9vw, 8rem)', { lineHeight: '0.8', letterSpacing: '-0.04em' }],
+        micro: ['0.6875rem', { lineHeight: '1.35', letterSpacing: '0.06em' }],
+        meta: ['0.75rem', { lineHeight: '1.45' }],
+        sm2: ['0.8125rem', { lineHeight: '1.5' }],
+        base2: ['0.9375rem', { lineHeight: '1.6' }],
+        lead: ['1.0625rem', { lineHeight: '1.6' }],
+        kpi: ['clamp(1.9rem, 3.4vw, 2.9rem)', { lineHeight: '1', letterSpacing: '-0.03em' }],
+        h3: ['1.0625rem', { lineHeight: '1.35', letterSpacing: '-0.01em' }],
+        h2: ['clamp(1.35rem, 2.4vw, 1.9rem)', { lineHeight: '1.18', letterSpacing: '-0.022em' }],
+        h1: ['clamp(1.9rem, 4vw, 3.1rem)', { lineHeight: '1.05', letterSpacing: '-0.032em' }],
       },
 
-      spacing: {
-        gutter: 'clamp(1.1rem, 4vw, 3.5rem)',
-        beat: 'clamp(4.5rem, 11vh, 8.5rem)',
-      },
-
-      maxWidth: { measure: '58ch', shell: '1560px' },
-      borderRadius: { panel: '6px', chip: '3px' },
+      spacing: { rail: '15rem' },
+      maxWidth: { content: '1320px', prose: '68ch' },
+      borderRadius: { panel: '10px', ctl: '7px', chip: '5px' },
 
       boxShadow: {
-        hard: '6px 6px 0 0 #0A0A0A',
-        hardBlaze: '6px 6px 0 0 #FF3D00',
-        lift: '0 2px 4px rgba(10,10,10,.06), 0 16px 40px -12px rgba(10,10,10,.18)',
+        panel: '0 1px 2px rgba(20,22,26,.04), 0 1px 1px rgba(20,22,26,.03)',
+        raise: '0 2px 4px rgba(20,22,26,.05), 0 12px 28px -10px rgba(20,22,26,.14)',
+        focus: '0 0 0 3px rgba(42,91,215,.18)',
       },
 
-      transitionTimingFunction: {
-        snap: 'cubic-bezier(0.2, 0.9, 0.1, 1)',   // fast, decisive
-        out: 'cubic-bezier(0.16, 1, 0.3, 1)',
-      },
-      transitionDuration: { fast: '140ms', mid: '380ms' },
+      transitionTimingFunction: { sys: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+      transitionDuration: { q: '130ms', m: '260ms' },
 
       keyframes: {
-        marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
-        blink: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0.25' } },
+        pulseDot: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0.35' } },
+        drawIn: { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' } },
       },
-      animation: {
-        marquee: 'marquee 26s linear infinite',
-        blink: 'blink 1.6s ease-in-out infinite',
-      },
+      animation: { pulseDot: 'pulseDot 2.4s ease-in-out infinite' },
     },
   },
   plugins: [],

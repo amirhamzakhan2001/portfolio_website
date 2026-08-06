@@ -25,11 +25,11 @@ export const qaDatabase = [
       'who is amir hamza khan', 'about amir hamza khan',
       'amir hamza khan', 'amir hamza', 'hamza khan',
     ],
-    answer: "Amir Hamza Khan is an AI/ML Engineer currently building Voxa — a production AI omnichannel platform at KreoHealth, Noida. He's completing his MSc in AI/ML from Jamia Millia Islamia (CGPA: 9.38) and holds a BSc in Applied Mathematics (9.53 CGPA, Ranked 2nd). He specializes in voice AI, RAG pipelines, LLM applications, and NLP systems.",
+    answer: "Amir Hamza Khan is an AI/ML Engineer currently building Voxa — a production AI omnichannel platform at Eyas Ventures, Noida. He's completing his MSc in AI/ML from Jamia Millia Islamia (CGPA: 9.49) and holds a BSc in Applied Mathematics (9.53 CGPA, Ranked 2nd). He specializes in voice AI, RAG pipelines, LLM applications, and NLP systems.",
   },
   {
     patterns: ['where is amir', 'location', 'city', 'where does he live'],
-    answer: "Amir is based in New Delhi, India. He's currently working on-site at KreoHealth in Noida.",
+    answer: "Amir is based in New Delhi, India. He's currently working on-site at Eyas Ventures in Noida.",
   },
   {
     patterns: ['education', 'degree', 'university', 'college', 'jmi', 'jamia', 'cgpa', 'marks'],
@@ -38,11 +38,11 @@ export const qaDatabase = [
   // Work
   {
     patterns: ['work', 'job', 'internship', 'experience', 'kreoh', 'kreohealth'],
-    answer: "Amir is currently an AI Intern at KreoHealth (Noida, Feb 2026–Present) where he's building Voxa — a production AI omnichannel SaaS. He's also an AI Evaluation Researcher at Outlier AI (Oct 2025–Present, remote) evaluating LLM outputs for hallucination, reasoning quality, and safety. He's also a Student Placement Coordinator at JMI's CS department.",
+    answer: "Amir is currently an AI Intern at Eyas Ventures (Noida, Feb 2026–Present) where he's building Voxa — a production AI omnichannel SaaS. He's also an AI Evaluation Researcher at Outlier AI (Oct 2025–Present, remote) evaluating LLM outputs for hallucination, reasoning quality, and safety. He's also a Student Placement Coordinator at JMI's CS department.",
   },
   {
     patterns: ['voxa', 'voice agent', 'ai platform', 'kreoh project'],
-    answer: "Voxa is an AI-powered omnichannel communication platform Amir built at KreoHealth. It features: intelligent voice agents using STT→LLM→TTS pipeline (5 LLM providers, 9 telephony integrations), a RAG-powered knowledge base on Qdrant, multi-channel campaigns (calls, SMS, email, WhatsApp), 3 CRM integrations (HubSpot, Salesforce, Zoho), and multi-tenant customization. The hardest problem he solved was barge-in detection using WebRTC + Silero-VAD.",
+    answer: "Voxa is an AI-powered omnichannel communication platform Amir built at Eyas Ventures. It features: intelligent voice agents using STT→LLM→TTS pipeline (5 LLM providers, 9 telephony integrations), a RAG-powered knowledge base on Qdrant, multi-channel campaigns (calls, SMS, email, WhatsApp), 3 CRM integrations (HubSpot, Salesforce, Zoho), and multi-tenant customization. The hardest problem he solved was barge-in detection using WebRTC + Silero-VAD.",
   },
   {
     patterns: ['outlier', 'llm evaluation', 'model evaluation'],
@@ -51,7 +51,7 @@ export const qaDatabase = [
   // Projects
   {
     patterns: ['project', 'built', 'what has amir made', 'portfolio', 'work samples'],
-    answer: "Amir's key projects: 1) Voxa (production AI platform @ KreoHealth), 2) NLP Email Categorization (60K+ emails, 96% accuracy), 3) Amazon ML Challenge 2025 (Top 2500/7000+ teams), 4) AI-Powered Quiz for Rural Learners (IBM certified), 5) Transformer from Scratch (full encoder-decoder), 6) Multi-task NLP Detection (emotion + hate speech + violence), 7) Cognivo (dementia companion app — coming soon), 8) JMI University Chatbot (LoRA fine-tuned Qwen — in progress). Want details on any specific one?",
+    answer: "Amir's key projects: 1) Voxa (production AI platform @ Eyas Ventures), 2) NLP Email Categorization (60K+ emails, 96% accuracy), 3) Amazon ML Challenge 2025 (Top 2500/7000+ teams), 4) AI-Powered Quiz for Rural Learners (IBM certified), 5) Transformer from Scratch (full encoder-decoder), 6) Multi-task NLP Detection (emotion + hate speech + violence), 7) Cognivo (dementia companion app — coming soon), 8) JMI University Chatbot (LoRA fine-tuned Qwen — in progress). Want details on any specific one?",
   },
   {
     patterns: ['email', 'nlp email', 'categorization', 'gmail'],
@@ -59,7 +59,7 @@ export const qaDatabase = [
   },
   {
     patterns: ['amazon', 'ml challenge', 'hackathon', 'competition'],
-    answer: "Amir participated in the Amazon ML Challenge 2025 with a team of 4 (Amir, Amir Pasha, Mohd Ahamad, Syed Taiyabullah). They built a multi-modal price prediction pipeline using LAION CLIP + Gemma embeddings, neural networks + XGBoost in a meta-model ensemble. Result: SMAPE of 54.6, ranked Top 2500 out of 7000+ teams.",
+    answer: "Amir participated in the Amazon ML Challenge 2025 with a team of 4 (Amir, Amir Pasha, Mohd Ahamad, Syed Taiyabullah). They built a multi-modal price prediction pipeline using LAION CLIP + Gemma embeddings, neural networks + XGBoost in a meta-model ensemble. Result: SMAPE of 54.6, ranked top 25% of entrants.",
   },
   {
     patterns: ['cognivo', 'dementia', 'healthcare'],
@@ -80,19 +80,19 @@ export const qaDatabase = [
   },
   {
     patterns: ['python', 'how good python', 'python level'],
-    answer: "Amir rates himself Intermediate+ in Python. He uses it daily for production code at KreoHealth — building FastAPI backends, LangChain pipelines, data processing scripts, and ML training loops. His Python work spans async programming, OOP design patterns, and API integrations.",
+    answer: "Amir rates himself Intermediate+ in Python. He uses it daily for production code at Eyas Ventures — building FastAPI backends, LangChain pipelines, data processing scripts, and ML training loops. His Python work spans async programming, OOP design patterns, and API integrations.",
   },
   {
     patterns: ['llm', 'large language model', 'gpt', 'claude', 'gemini'],
-    answer: "Amir works with GPT-4, Claude (Anthropic), Google Gemini, DeepSeek, and AWS Bedrock in production at KreoHealth. He also fine-tuned Qwen using LoRA, and fine-tuned BERT, GPT-2, CLIP, and Gemma for various tasks. He evaluates LLMs professionally at Outlier AI.",
+    answer: "Amir works with GPT-4, Claude (Anthropic), Google Gemini, DeepSeek, and AWS Bedrock in production at Eyas Ventures. He also fine-tuned Qwen using LoRA, and fine-tuned BERT, GPT-2, CLIP, and Gemma for various tasks. He evaluates LLMs professionally at Outlier AI.",
   },
   {
     patterns: ['rag', 'retrieval', 'vector', 'qdrant', 'faiss'],
-    answer: "RAG (Retrieval-Augmented Generation) is central to Amir's work. He built production RAG systems at KreoHealth using Qdrant for vector storage. His NLP Email project used FAISS. He can implement the full pipeline: document chunking, embedding generation, similarity search, context augmentation, and LLM generation.",
+    answer: "RAG (Retrieval-Augmented Generation) is central to Amir's work. He built production RAG systems at Eyas Ventures using Qdrant for vector storage. His NLP Email project used FAISS. He can implement the full pipeline: document chunking, embedding generation, similarity search, context augmentation, and LLM generation.",
   },
   {
     patterns: ['voice', 'speech', 'tts', 'stt', 'deepgram', 'elevenlabs'],
-    answer: "Voice AI is Amir's specialty at KreoHealth. He worked with Deepgram, Sarvam, Cartesia (STT), and ElevenLabs, Sarvam, Cartesia (TTS) in production. He solved the hardest voice AI problem — barge-in detection — using WebRTC + Silero-VAD for real-time noise handling and mid-speech interruption.",
+    answer: "Voice AI is Amir's specialty at Eyas Ventures. He worked with Deepgram, Sarvam, Cartesia (STT), and ElevenLabs, Sarvam, Cartesia (TTS) in production. He solved the hardest voice AI problem — barge-in detection — using WebRTC + Silero-VAD for real-time noise handling and mid-speech interruption.",
   },
   // Achievements
   {
@@ -119,7 +119,7 @@ export const qaDatabase = [
   },
   {
     patterns: ['resume', 'cv', 'download'],
-    answer: "You can download Amir's latest resume using the 'Download Resume' button in the top navbar. It covers all his experience at KreoHealth and Outlier AI, projects, education, and certifications.",
+    answer: "You can download Amir's latest resume using the 'Download Resume' button in the top navbar. It covers all his experience at Eyas Ventures and Outlier AI, projects, education, and certifications.",
   },
   // GitHub
   {

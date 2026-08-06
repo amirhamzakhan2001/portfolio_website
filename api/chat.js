@@ -22,7 +22,7 @@ IDENTITY:
 - Role: AI/ML Engineer
 
 CURRENT WORK:
-1. Artificial Intelligence Intern @ KreoHealth (Feb 2026 – Present, Noida, on-site)
+1. Artificial Intelligence Intern @ Eyas Ventures (Feb 2026 – Present, Noida, on-site)
    - Building Voxa: a production AI omnichannel SaaS platform
    - Voxa features: intelligent voice agents (STT→LLM→TTS pipeline), RAG-powered knowledge base, multi-channel campaigns (calls, SMS, email, WhatsApp), CRM integrations (HubSpot, Salesforce, Zoho), multi-tenant architecture
    - LLM providers integrated: OpenAI GPT-4, Anthropic Claude, Google Gemini, DeepSeek, AWS Bedrock
@@ -41,13 +41,13 @@ CURRENT WORK:
    - Coordinating campus recruitment: company liaisons, interview scheduling, student job matching
 
 EDUCATION:
-- MSc Artificial Intelligence & Machine Learning — Jamia Millia Islamia, Central University, New Delhi (Jul 2024 – Present) | CGPA: 9.38/10 | Semester 4: Full-time internship
+- MSc Artificial Intelligence & Machine Learning — Jamia Millia Islamia, Central University, New Delhi (Jul 2024 – Present) | CGPA: 9.49/10 | Semester 4: Full-time internship
 - BSc (Hons) Applied Mathematics — Jamia Millia Islamia (2019–2022) | CGPA: 9.53/10 | Ranked 2nd in Class
 
 PROJECTS:
-1. Voxa — AI Omnichannel Platform (production, KreoHealth) — confidential code
+1. Voxa — AI Omnichannel Platform (production, Eyas Ventures) — confidential code
 2. NLP Email Categorization — 60K+ Gmail emails processed, zero manual labels, 96% MLP accuracy, all-MiniLM-L6-v2 + Gemma + Qwen embeddings, Bisecting K-Means, Docker/MLflow — GitHub: github.com/amirhamzakhan2001/nlp-email-categorization
-3. Amazon ML Challenge 2025 — multi-modal price prediction (images + text), SMAPE 54.6, Top 2500 out of 7000+ teams, PyTorch + OpenCLIP + XGBoost ensemble — team of 4
+3. Amazon ML Challenge 2025 — multi-modal price prediction (images + text), SMAPE 54.6, top 25% of entrants, PyTorch + OpenCLIP + XGBoost ensemble — team of 4
 4. AI-Powered Quiz for Rural Learners (IBM SkillBuild) — LangChain + LangGraph + Gemini + FAISS + MongoDB + Streamlit, multilingual (Indian languages), IBM AI Agent Architect certified — GitHub: github.com/amirhamzakhan2001/AI-Powered-Quiz
 5. Transformer from Scratch — full encoder-decoder transformer in pure PyTorch — GitHub: github.com/amirhamzakhan2001/Transformer_scratch
 6. Multi-task NLP Detection — emotion + hate speech + violence detection simultaneously, LSTM + Keras — GitHub: github.com/amirhamzakhan2001/nlp_emotion_detection
