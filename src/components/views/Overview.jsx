@@ -58,7 +58,7 @@ export default function Overview() {
                 rel="noopener noreferrer"
                 className="btn-sec"
               >
-                Résumé (PDF)
+                Resume (PDF)
               </a>
             </div>
           </div>

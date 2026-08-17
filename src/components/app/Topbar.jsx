@@ -1,3 +1,5 @@
+import { SOCIALS, SocialIcon } from '../../data/socials'
+
 export default function Topbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-[var(--top-h)] border-b border-line bg-app/92 backdrop-blur lg:left-[var(--rail-w)]">
@@ -20,14 +22,19 @@ export default function Topbar() {
           <span className="hidden font-mono text-[0.66rem] text-ink3 md:inline">
             Last updated Aug 2026
           </span>
-          <a
-            href="https://github.com/amirhamzakhan2001"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-sec !px-2.5 !py-1.5 !text-[0.78rem]"
-          >
-            GitHub ↗
-          </a>
+          {SOCIALS.map(({ label, href, viewBox, path }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              title={label}
+              className="btn-sec grid h-[30px] w-[30px] place-items-center !p-0 text-ink2 transition-colors duration-q hover:text-brand"
+            >
+              <SocialIcon viewBox={viewBox} path={path} size="0.95rem" />
+            </a>
+          ))}
           <a
             href="mailto:amirhamzakhan2001@gmail.com"
             className="btn !px-3 !py-1.5 !text-[0.78rem]"

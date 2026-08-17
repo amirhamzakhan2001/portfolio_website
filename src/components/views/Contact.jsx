@@ -5,7 +5,7 @@ const CHANNELS = [
   ['Phone', '+91 75418 96866', 'tel:+917541896866', null],
   ['LinkedIn', 'in/amirhamzakhan032001', 'https://www.linkedin.com/in/amirhamzakhan032001', null],
   ['GitHub', 'amirhamzakhan2001', 'https://github.com/amirhamzakhan2001', null],
-  ['Résumé', 'Download PDF', '/Amir_Hamza_Resume.pdf', null],
+  ['Resume', 'Download PDF', '/Amir_Hamza_Resume.pdf', null],
 ]
 
 export default function Contact() {
@@ -32,7 +32,7 @@ export default function Contact() {
                 Send an email
               </a>
               <a href="/Amir_Hamza_Resume.pdf" target="_blank" rel="noopener noreferrer" className="btn-sec">
-                Résumé (PDF)
+                Resume (PDF)
               </a>
             </div>
           </div>

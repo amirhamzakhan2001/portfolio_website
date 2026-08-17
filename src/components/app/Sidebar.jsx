@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { scrollToId } from '../../lib/useLenis'
+import { SOCIALS, SocialIcon } from '../../data/socials'
 
 export const VIEWS = [
   { id: 'overview', label: 'Overview', glyph: '▤' },
@@ -98,24 +99,30 @@ export default function Sidebar() {
         {/* rail footer */}
         <div className="border-t border-line p-2.5">
           <a href="/Amir_Hamza_Resume.pdf" target="_blank" rel="noopener noreferrer" className="btn w-full">
-            Download résumé
+            Download resume
           </a>
-          <div className="mt-2 flex items-center justify-between px-1">
-            {[
-              ['GH', 'https://github.com/amirhamzakhan2001'],
-              ['IN', 'https://www.linkedin.com/in/amirhamzakhan032001'],
-              ['@', 'mailto:amirhamzakhan2001@gmail.com'],
-            ].map(([l, h]) => (
+          <div className="mt-2 flex items-center justify-center gap-1.5 px-1">
+            {SOCIALS.map(({ label, href, viewBox, path }) => (
               <a
-                key={l}
-                href={h}
+                key={label}
+                href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[0.66rem] uppercase tracking-wide text-ink3 transition-colors duration-q hover:text-brand"
+                aria-label={label}
+                title={label}
+                className="rounded-[5px] p-1.5 text-ink3 transition-colors duration-q hover:text-brand"
               >
-                {l}
+                <SocialIcon viewBox={viewBox} path={path} size="0.95rem" />
               </a>
             ))}
+            <a
+              href="mailto:amirhamzakhan2001@gmail.com"
+              aria-label="Email"
+              title="Email"
+              className="rounded-[5px] p-1.5 font-mono text-[0.8rem] leading-none text-ink3 transition-colors duration-q hover:text-brand"
+            >
+              @
+            </a>
           </div>
         </div>
       </aside>
