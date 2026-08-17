@@ -96,7 +96,7 @@ export default function Hero() {
                 data-magnetic
                 className="btn-ghost"
               >
-                Résumé
+                Resume
               </a>
             </div>
           </div>

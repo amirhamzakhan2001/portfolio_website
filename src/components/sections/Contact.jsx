@@ -59,7 +59,7 @@ export default function Contact() {
             data-magnetic
             className="btn-ghost"
           >
-            Résumé (PDF)
+            Resume (PDF)
           </a>
         </div>
 
