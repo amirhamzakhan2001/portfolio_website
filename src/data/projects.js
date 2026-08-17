@@ -36,109 +36,42 @@
 export const PROJECTS = [
   {
     id: 'voxa',
-    title: 'Voxa — AI Omnichannel Platform',
-    subtitle: 'Production SaaS @ KreoHealth',
-    description:
-      'An AI-powered omnichannel communication platform that unifies intelligent voice agents, RAG-based knowledge retrieval, multi-channel messaging, and CRM sync into a single SaaS product. Built end-to-end during my AI internship.',
-    longDescription: `Voxa is a production-grade AI platform I built at KreoHealth. The voice agent handles natural phone conversations using a full STT → LLM → TTS pipeline. I built the RAG-powered knowledge base using Qdrant so agents answer company-specific questions from uploaded documents in real time.
-
-The hardest problem was implementing barge-in detection — I used WebRTC + Silero-VAD to detect when a user speaks mid-response, instantly pausing the agent. I also built multi-channel campaign engines (call, SMS, email, WhatsApp), integrated 3 CRMs with bidirectional real-time sync, and architected multi-tenant customization so businesses can configure agent behavior without code.`,
-    tech: ['Python', 'FastAPI', 'LangChain', 'OpenAI', 'Claude', 'Deepgram', 'ElevenLabs', 'Qdrant', 'Supabase', 'WebRTC', 'Silero-VAD', 'Twilio', 'Docker', 'Kubernetes'],
-    badges: ['Production SaaS', '5 LLM Providers', '9 Telephony Providers', 'Multi-tenant'],
-    gradient: 'from-indigo-500 via-violet-500 to-purple-600',
-    glowColor: 'rgba(99,102,241,0.4)',
-    icon: '🎙️',
-    github: null, // confidential
-    demo: null,
-    linkedin: 'https://www.linkedin.com/in/amirhamzakhan032001',
-    video: null,      // add Loom/YouTube URL here
-    image: null,      // add /projects/voxa.png here
-    status: 'production',
-    featured: true,
+    name: 'voxa',
+    title: 'Voice agent platform',
+    kind: 'Product',
+    org: 'Eyas Ventures',
+    year: '2026',
+    status: 'shipped',
+    metric: '~1000ms end-to-end',
+    stack: ['Python', 'FastAPI', 'LangChain', 'ElevenLabs', 'Cartesia', 'AssemblyAI', 'Qdrant'],
+    problem:
+      'Businesses want a voice agent that sounds like them, answers from their own documents, and can be reconfigured without an engineer — but every tenant needs a different speech stack, prompt and knowledge base.',
+    approach:
+      'Architected a multi-tenant voice agent with configurable STT, LLM and TTS pipelines per tenant, including voice cloning through ElevenLabs, Cartesia and AssemblyAI. Built the agent creation workflow — dynamic prompt generation, a RAG knowledge base for company-specific answers, calendar integration, and credit-based usage and billing.',
+    result:
+      '~1000ms end-to-end response latency. Integrated 5+ external voice platforms (Ringg, Retell, Vapi) over REST, 4-channel outbound campaigns across call, SMS, email and WhatsApp, plus automated recordings, transcripts and real-time analytics dashboards. Live in production.',
+    links: [
+      { label: 'Live product', url: 'https://prometrix.ai/voxa/' },
+      // { label: 'Watch demo', url: 'PASTE LINKEDIN VIDEO POST URL' },
+    ],
   },
   {
-    id: 'nlp-email',
-    title: 'NLP Email Categorization',
-    subtitle: 'MSc Minor Project',
-    description:
-      'End-to-end NLP pipeline that processes 60K+ Gmail emails without manual labeling. Uses transformer embeddings, hierarchical clustering, LLM-based label generation, and an MLP classifier achieving 96% accuracy.',
-    longDescription: `Built an industry-scale NLP system to solve a real-world problem: emails are unstructured, continuously arriving, and expensive to label. The system uses all-MiniLM-L6-v2 + Gemma + Qwen embeddings with PCA dimensionality reduction, then applies Bisecting K-Means clustering. LLMs auto-assign meaningful category labels to clusters, eliminating manual labeling. A trained MLP classifier then handles real-time inference on new emails. Dockerized with MLOps principles for incremental updates.`,
-    tech: ['Python', 'all-MiniLM-L6-v2', 'Gemma Embeddings', 'FAISS', 'MLP Classifier', 'LangChain', 'Docker', 'MLflow', 'Pandas'],
-    badges: ['60K+ Emails', '96% Accuracy', 'Zero Manual Labels'],
-    gradient: 'from-cyan-500 to-indigo-500',
-    glowColor: 'rgba(6,182,212,0.4)',
-    icon: '📧',
-    github: 'https://github.com/amirhamzakhan2001/nlp-email-categorization',
-    demo: null,
-    linkedin: null,
-    video: null,
-    image: null,      // add /projects/nlp-email.png here
-    status: 'public',
-    featured: true,
-  },
-  {
-    id: 'amazon-ml',
-    title: 'Amazon ML Challenge 2025',
-    subtitle: 'National Hackathon',
-    description:
-      'Multi-modal price prediction pipeline combining product images and text descriptions. Ranked in Top 2500 out of 7000+ teams with SMAPE of 54.6.',
-    tech: ['PyTorch', 'OpenCLIP', 'Sentence Transformers', 'XGBoost', 'AutoML', 'Gemma Embeddings', 'LAION CLIP'],
-    badges: ['Top 2500 / 7000+ Teams', 'SMAPE: 54.6', 'Multi-modal'],
-    gradient: 'from-violet-500 to-pink-500',
-    glowColor: 'rgba(139,92,246,0.4)',
-    icon: '🏆',
-    github: 'https://github.com/amirhamzakhan2001/amazon_challange_2k25',
-    demo: null,
-    status: 'public',
-    featured: false,
-  },
-  {
-    id: 'ibm-quiz',
-    title: 'AI Quiz — Rural Learners',
-    subtitle: 'IBM SkillBuild Project',
-    description:
-      'LLM-powered quiz platform for rural learners (Grades 3–12) with multilingual support, auto-grading, and personalized feedback. Built as AI/Backend lead in a 6-person team.',
-    tech: ['LangChain', 'LangGraph', 'Google Gemini', 'RAG', 'FAISS', 'MongoDB Atlas', 'Streamlit', 'Python'],
-    badges: ['IBM Certified', 'Multilingual', 'IBM SkillBuild'],
-    gradient: 'from-cyan-500 to-green-500',
-    glowColor: 'rgba(6,182,212,0.3)',
-    icon: '🤖',
-    github: 'https://github.com/amirhamzakhan2001/AI-Powered-Quiz',
-    demo: 'https://ai-powered-quiz-afq1.onrender.com',
-    status: 'public',
-    featured: false,
-  },
-  {
-    id: 'transformer',
-    title: 'Transformer from Scratch',
-    subtitle: 'Deep Learning Study',
-    description:
-      'Full encoder-decoder transformer architecture implemented in pure PyTorch — attention, positional encoding, multi-head attention, feed-forward layers — from mathematical foundations to working code.',
-    tech: ['PyTorch', 'NumPy', 'Python', 'Math'],
-    badges: ['Full Encoder-Decoder', 'From Scratch'],
-    gradient: 'from-indigo-500 to-purple-500',
-    glowColor: 'rgba(99,102,241,0.3)',
-    icon: '🔮',
-    github: 'https://github.com/amirhamzakhan2001/Transformer_scratch',
-    demo: null,
-    status: 'public',
-    featured: false,
-  },
-  {
-    id: 'emotion',
-    title: 'Multi-task NLP Detection',
-    subtitle: 'NLP Project',
-    description:
-      'Multi-output deep learning model that simultaneously detects emotions, violence types, and hate speech from text — three classification tasks in a single shared-embedding architecture.',
-    tech: ['TensorFlow', 'Keras', 'NLTK', 'LSTM', 'Streamlit', 'Python'],
-    badges: ['3 Tasks Simultaneously', 'Streamlit Demo'],
-    gradient: 'from-purple-500 to-red-500',
-    glowColor: 'rgba(168,85,247,0.3)',
-    icon: '🧠',
-    github: 'https://github.com/amirhamzakhan2001/nlp_emotion_detection',
-    demo: null,
-    status: 'public',
-    featured: false,
+    id: 'modelspine',
+    name: 'modelspine',
+    title: 'ModelSpine — AI model discovery platform',
+    kind: 'Product',
+    org: 'Independent',
+    year: '2026',
+    status: 'shipped',
+    metric: '13,517 models · 139,987 papers',
+    stack: ['Python', 'Hugging Face API', 'arXiv', 'OpenAlex', 'Vercel'],
+    problem:
+      'Choosing an open AI model means wading through leaderboards, acronyms and benchmark tables that assume you already know what you are looking for — and nothing tells you whether a model will actually run on your hardware.',
+    approach:
+      'Built a daily-refreshed index that harvests models and papers from Hugging Face, arXiv and OpenAlex, then organises them by what they *do* rather than by architecture — 13 functional categories from speech-to-text to reranking. Added a memory calculator that computes runtime requirements directly from each model’s config.',
+    result:
+      '13,517 models and 139,987 papers indexed and updated daily. Built on three rules: data is harvested not hand-curated, metrics are quoted not estimated, and requirements are computed not guessed.',
+    links: [{ label: 'Live site', url: 'https://modelspine.vercel.app/' }],
   },
   {
     id: 'cognivo',
